@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using Recurly.Configuration;
 
@@ -96,10 +97,21 @@ namespace Recurly
             return PerformRequest(method, urlPath, null, null, null, null);
         }
 
+        public async Task<HttpStatusCode> PerformRequestAsync(HttpRequestMethod method, string urlPath)
+        {
+            return await PerformRequestAsync(method, urlPath, null, null, null, null);
+        }
+
         public HttpStatusCode PerformRequest(HttpRequestMethod method, string urlPath,
             ReadXmlDelegate readXmlDelegate)
         {
             return PerformRequest(method, urlPath, null, readXmlDelegate, null, null);
+        }
+
+        public async Task<HttpStatusCode> PerformRequestAsync(HttpRequestMethod method, string urlPath,
+            ReadXmlDelegate readXmlDelegate)
+        {
+            return await PerformRequestAsync(method, urlPath, null, readXmlDelegate, null, null);
         }
 
         public HttpStatusCode PerformRequest(HttpRequestMethod method, string urlPath,
@@ -108,10 +120,22 @@ namespace Recurly
             return PerformRequest(method, urlPath, writeXmlDelegate, null, null, null);
         }
 
+        public async Task<HttpStatusCode> PerformRequestAsync(HttpRequestMethod method, string urlPath,
+            WriteXmlDelegate writeXmlDelegate)
+        {
+            return await PerformRequestAsync(method, urlPath, writeXmlDelegate, null, null, null);
+        }
+
         public HttpStatusCode PerformRequest(HttpRequestMethod method, string urlPath,
             WriteXmlDelegate writeXmlDelegate, ReadXmlDelegate readXmlDelegate)
         {
             return PerformRequest(method, urlPath, writeXmlDelegate, readXmlDelegate, null, null);
+        }
+
+        public async Task<HttpStatusCode> PerformRequestAsync(HttpRequestMethod method, string urlPath,
+             WriteXmlDelegate writeXmlDelegate, ReadXmlDelegate readXmlDelegate)
+        {
+            return await PerformRequestAsync(method, urlPath, writeXmlDelegate, readXmlDelegate, null, null);
         }
 
         public HttpStatusCode PerformRequest(HttpRequestMethod method, string urlPath,
@@ -120,10 +144,22 @@ namespace Recurly
             return PerformRequest(method, urlPath, null, null, readXmlListDelegate, null);
         }
 
+        public async Task<HttpStatusCode> PerformRequestAsync(HttpRequestMethod method, string urlPath,
+             ReadXmlListDelegate readXmlListDelegate)
+        {
+            return await PerformRequestAsync(method, urlPath, null, null, readXmlListDelegate, null);
+        }
+
         public HttpStatusCode PerformRequest(HttpRequestMethod method, string urlPath,
             WriteXmlDelegate writeXmlDelegate, ReadResponseDelegate responseDelegate)
         {
             return PerformRequest(method, urlPath, writeXmlDelegate, null, null, responseDelegate);
+        }
+
+        public async Task<HttpStatusCode> PerformRequestAsync(HttpRequestMethod method, string urlPath,
+             WriteXmlDelegate writeXmlDelegate, ReadResponseDelegate responseDelegate)
+        {
+            return await PerformRequestAsync(method, urlPath, writeXmlDelegate, null, null, responseDelegate);
         }
 
         protected virtual HttpStatusCode PerformRequest(HttpRequestMethod method, string urlPath,
@@ -226,6 +262,106 @@ namespace Recurly
             }
         }
 
+        protected virtual async Task<HttpStatusCode> PerformRequestAsync(HttpRequestMethod method, string urlPath,
+    WriteXmlDelegate writeXmlDelegate, ReadXmlDelegate readXmlDelegate, ReadXmlListDelegate readXmlListDelegate, ReadResponseDelegate reseponseDelegate)
+        {
+            var url = Settings.GetServerUri(urlPath);
+#if (DEBUG)
+            Console.WriteLine("Requesting " + method + " " + url);
+#endif
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            request.Accept = "application/xml";      // Tells the server to return XML instead of HTML
+            request.ContentType = "application/xml; charset=utf-8"; // The request is an XML document
+            request.SendChunked = false;             // Send it all as one request
+            request.UserAgent = Settings.UserAgent;
+            request.Headers.Add(HttpRequestHeader.Authorization, Settings.AuthorizationHeaderValue);
+            request.Headers.Add("X-Api-Version", Settings.RecurlyApiVersion);
+            request.Method = method.ToString().ToUpper();
+
+            Debug.WriteLine(String.Format("Recurly: Requesting {0} {1}", request.Method, request.RequestUri));
+
+            if ((method == HttpRequestMethod.Post || method == HttpRequestMethod.Put) && (writeXmlDelegate != null))
+            {
+                // 60 second timeout -- some payment gateways (e.g. PayPal) can take a while to respond
+                request.Timeout = 60000;
+
+                // Write POST/PUT body
+                using (var requestStream = await request.GetRequestStreamAsync())
+                {
+                    WritePostParameters(requestStream, writeXmlDelegate);
+                }
+            }
+            else
+            {
+                request.ContentLength = 0;
+            }
+
+            try
+            {
+                using (var response = (HttpWebResponse)await request.GetResponseAsync())
+                {
+
+                    ReadWebResponse(response, readXmlDelegate, readXmlListDelegate, reseponseDelegate);
+                    return response.StatusCode;
+
+                }
+            }
+            catch (WebException ex)
+            {
+                if (ex.Response == null) throw;
+
+                var response = (HttpWebResponse)ex.Response;
+                var statusCode = response.StatusCode;
+                Errors errors;
+
+                Debug.WriteLine(String.Format("Recurly Library Received: {0} - {1}", (int)statusCode, statusCode));
+
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.OK:
+                    case HttpStatusCode.Accepted:
+                    case HttpStatusCode.Created:
+                    case HttpStatusCode.NoContent:
+                        ReadWebResponse(response, readXmlDelegate, readXmlListDelegate, reseponseDelegate);
+
+                        return HttpStatusCode.NoContent;
+
+                    case HttpStatusCode.NotFound:
+                        errors = Errors.ReadResponseAndParseErrors(response);
+                        if (errors.ValidationErrors.HasAny())
+                            throw new NotFoundException(errors.ValidationErrors[0].Message, errors);
+                        throw new NotFoundException("The requested object was not found.", errors);
+
+                    case HttpStatusCode.Unauthorized:
+                    case HttpStatusCode.Forbidden:
+                        errors = Errors.ReadResponseAndParseErrors(response);
+                        throw new InvalidCredentialsException(errors);
+
+                    case HttpStatusCode.BadRequest:
+                    case HttpStatusCode.PreconditionFailed:
+                        errors = Errors.ReadResponseAndParseErrors(response);
+                        throw new ValidationException(errors);
+
+                    case HttpStatusCode.ServiceUnavailable:
+                        throw new TemporarilyUnavailableException();
+
+                    case HttpStatusCode.InternalServerError:
+                        errors = Errors.ReadResponseAndParseErrors(response);
+                        throw new ServerException(errors);
+                }
+
+                if ((int)statusCode == ValidationException.HttpStatusCode) // Unprocessable Entity
+                {
+                    errors = Errors.ReadResponseAndParseErrors(response);
+                    if (errors.ValidationErrors.HasAny()) Debug.WriteLine(errors.ValidationErrors[0].ToString());
+                    else Debug.WriteLine("Client Error: " + response.ToString());
+                    throw new ValidationException(errors);
+                }
+
+                throw;
+            }
+        }
+
         /// <summary>
         /// Used for downloading PDFs
         /// </summary>
@@ -233,7 +369,7 @@ namespace Recurly
         /// <param name="acceptType"></param>
         /// <param name="acceptLanguage"></param>
         /// <returns></returns>
-        public virtual byte[] PerformDownloadRequest(string urlPath, string acceptType, string acceptLanguage)
+        public virtual async Task<byte[]> PerformDownloadRequestAsync(string urlPath, string acceptType, string acceptLanguage)
         {
             var url = Settings.GetServerUri(urlPath);
 
@@ -250,7 +386,7 @@ namespace Recurly
 
             try
             {
-                var r = (HttpWebResponse)request.GetResponse();
+                var r = (HttpWebResponse)await request.GetResponseAsync();
                 byte[] pdf;
                 var buffer = new byte[2048];
                 if (!request.HaveResponse || r.StatusCode != HttpStatusCode.OK) return null;
@@ -416,20 +552,10 @@ namespace Recurly
 
         protected virtual MemoryStream CopyAndClose(Stream inputStream)
         {
-            const int readSize = 256;
-            var buffer = new byte[readSize];
             var ms = new MemoryStream();
-
-            var count = inputStream.Read(buffer, 0, readSize);
-            while (count > 0)
-            {
-                ms.Write(buffer, 0, count);
-                count = inputStream.Read(buffer, 0, readSize);
-            }
-            ms.Position = 0;
+            inputStream.CopyTo(ms);
             inputStream.Close();
             return ms;
         }
-
     }
 }

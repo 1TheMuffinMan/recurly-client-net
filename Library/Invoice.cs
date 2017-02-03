@@ -3,6 +3,7 @@ using System.Net;
 using System.Xml;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Recurly
 {
@@ -99,9 +100,9 @@ namespace Recurly
         /// </summary>
         /// <param name="acceptLanguage">Language for invoice, defaults to en-US.</param>
         /// <returns></returns>
-        public byte[] GetPdf(string acceptLanguage = "en-US")
+        public async Task<byte[]> GetPdfAsync(string acceptLanguage = "en-US")
         {
-            return Client.Instance.PerformDownloadRequest(memberUrl(), "application/pdf", acceptLanguage);
+            return await Client.Instance.PerformDownloadRequestAsync(memberUrl(), "application/pdf", acceptLanguage);
         }
 
         /// <summary>

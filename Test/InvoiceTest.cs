@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Threading.Tasks;
+using FluentAssertions;
 using Xunit;
 
 namespace Recurly.Test
@@ -23,7 +24,7 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void GetInvoicePdf()
+        public async Task GetInvoicePdf()
         {
             var account = CreateNewAccount();
 
@@ -32,7 +33,7 @@ namespace Recurly.Test
 
             var invoice = account.InvoicePendingCharges();
 
-            var pdf = invoice.GetPdf();
+            var pdf = await invoice.GetPdfAsync();
 
             pdf.Should().NotBeEmpty();
         }
