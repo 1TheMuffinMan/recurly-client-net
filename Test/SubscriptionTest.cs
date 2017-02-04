@@ -14,7 +14,7 @@ namespace Recurly.Test
         {
             var plan = new Plan(GetMockPlanCode(), GetMockPlanName()) { Description = "Lookup Subscription Test" };
             plan.UnitAmountInCents.Add("USD", 1500);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -38,7 +38,7 @@ namespace Recurly.Test
                 Description = "Lookup Subscription With Pending Changes Test"
             };
             plan.UnitAmountInCents.Add("USD", 1500);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -62,7 +62,7 @@ namespace Recurly.Test
                 Description = "Create Subscription Test"
             };
             plan.UnitAmountInCents.Add("USD", 100);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -97,7 +97,7 @@ namespace Recurly.Test
                 Description = "Create Bulk Subscription Test"
             };
             plan.UnitAmountInCents.Add("USD", 100);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -123,7 +123,7 @@ namespace Recurly.Test
                 Description = "Create Subscription With Coupon Test"
             };
             plan.UnitAmountInCents.Add("USD", 100);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var coupon = new Coupon(GetMockCouponCode(), "Sub Test " + GetMockCouponName(), 10);
@@ -146,7 +146,7 @@ namespace Recurly.Test
                 Description = "Update Subscription Plan 1"
             };
             plan.UnitAmountInCents.Add("USD", 1500);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var plan2 = new Plan(GetMockPlanCode(), GetMockPlanName())
@@ -154,7 +154,7 @@ namespace Recurly.Test
                 Description = "Update Subscription Plan 2"
             };
             plan2.UnitAmountInCents.Add("USD", 750);
-            plan2.Create();
+            plan2.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan2);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -179,7 +179,7 @@ namespace Recurly.Test
                 Description = "Cancel Subscription Test"
             };
             plan.UnitAmountInCents.Add("USD", 100);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -201,7 +201,7 @@ namespace Recurly.Test
                 Description = "Reactivate Subscription Test"
             };
             plan.UnitAmountInCents.Add("USD", 100);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -225,7 +225,7 @@ namespace Recurly.Test
                 Description = "Terminate No Refund Subscription Test"
             };
             plan.UnitAmountInCents.Add("USD", 200);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -245,7 +245,7 @@ namespace Recurly.Test
                 Description = "Terminate Partial Refund Subscription Test"
             };
             plan.UnitAmountInCents.Add("USD", 2000);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -265,7 +265,7 @@ namespace Recurly.Test
                 Description = "Terminate Full Refund Subscription Test"
             };
             plan.UnitAmountInCents.Add("USD", 20000);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -286,7 +286,7 @@ namespace Recurly.Test
                 Description = "Postpone Subscription Test"
             };
             plan.UnitAmountInCents.Add("USD", 100);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -309,7 +309,7 @@ namespace Recurly.Test
                 Description = "Postpone Subscription Test"
             };
             plan.UnitAmountInCents.Add("USD", 100);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -350,7 +350,7 @@ namespace Recurly.Test
                     Description = "Create Subscription Plan With Addons Test"
                 };
                 plan.UnitAmountInCents.Add("USD", 100);
-                plan.Create();
+                plan.CreateAsync();
 
                 addon1 = plan.NewAddOn("addon1", "addon1");
                 addon1.DisplayQuantityOnHostedPage = true;
@@ -368,7 +368,7 @@ namespace Recurly.Test
                     Description = "Create Subscription Plan With Addons Test 2"
                 };
                 plan2.UnitAmountInCents.Add("USD", 1900);
-                plan2.Create();
+                plan2.CreateAsync();
 
                 addon2 = plan2.NewAddOn("addon1", "addon2");
                 addon2.DisplayQuantityOnHostedPage = true;
@@ -417,8 +417,8 @@ namespace Recurly.Test
             finally
             {
                 if (sub != null) sub.Cancel();
-                if (plan2 != null) plan2.Deactivate();
-                if (plan != null) plan.Deactivate();
+                if (plan2 != null) plan2.DeactivateAsync();
+                if (plan != null) plan.DeactivateAsync();
                 if (account != null) await account.CloseAsync();
             }
         }
@@ -439,7 +439,7 @@ namespace Recurly.Test
                     Description = "Create Subscription Plan With Addons Test"
                 };
                 plan.UnitAmountInCents.Add("USD", 100);
-                plan.Create();
+                plan.CreateAsync();
 
                 int numberOfAddons = 7;
 
@@ -517,7 +517,7 @@ namespace Recurly.Test
                 try
                 {
                     if (sub != null && sub.Uuid != null) sub.Cancel();
-                    if (plan != null) plan.Deactivate();
+                    if (plan != null) plan.DeactivateAsync();
                     if (account != null) await account.CloseAsync();
                 }
                 catch (RecurlyException e) { }
@@ -532,7 +532,7 @@ namespace Recurly.Test
                 Description = "Preview Subscription Test"
             };
             plan.UnitAmountInCents.Add("USD", 1500);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();

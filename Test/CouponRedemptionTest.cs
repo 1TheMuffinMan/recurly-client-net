@@ -75,7 +75,7 @@ namespace Recurly.Test
                 Description = "Test Lookup Coupon Invoice"
             };
             plan.UnitAmountInCents.Add("USD", 1500);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();

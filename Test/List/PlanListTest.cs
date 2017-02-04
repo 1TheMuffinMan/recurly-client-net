@@ -10,7 +10,7 @@ namespace Recurly.Test
         {
             var plan = new Plan(GetMockPlanCode(), GetMockPlanName());
             plan.SetupFeeInCents.Add("USD", 100);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var plans = Plans.List();
@@ -23,7 +23,7 @@ namespace Recurly.Test
             var plans = Plans.List();
             foreach (var plan in plans)
             {
-                plan.Deactivate();
+                plan.DeactivateAsync();
             }
         }
     }

@@ -136,7 +136,7 @@ namespace Recurly.Test
             var plan = new Plan(GetMockPlanCode("coupon plan"), "Coupon Test");
             plan.SetupFeeInCents.Add("USD", 500);
             plan.UnitAmountInCents.Add("USD", 5000);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), new Dictionary<string, int>());

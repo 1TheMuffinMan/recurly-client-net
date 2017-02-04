@@ -12,7 +12,7 @@ namespace Recurly.Test
             var plan = new Plan(GetMockPlanCode(), GetMockPlanName()) {Description = "Test Lookup"};
             plan.UnitAmountInCents.Add("USD", 100);
             plan.TaxExempt = true;
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             plan.CreatedAt.Should().NotBe(default(DateTime));
@@ -30,7 +30,7 @@ namespace Recurly.Test
         {
             var plan = new Plan(GetMockPlanCode(), GetMockPlanName());
             plan.SetupFeeInCents.Add("USD", 100);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             plan.CreatedAt.Should().NotBe(default(DateTime));
@@ -55,7 +55,7 @@ namespace Recurly.Test
                 PlanIntervalLength = 180
             };
             plan.SetupFeeInCents.Add("USD", 500);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             plan.CreatedAt.Should().NotBe(default(DateTime));
@@ -77,14 +77,14 @@ namespace Recurly.Test
         {
             var plan = new Plan(GetMockPlanCode(), GetMockPlanName()) {Description = "Test Update"};
             plan.UnitAmountInCents.Add("USD", 100);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             plan.UnitAmountInCents["USD"] = 5000;
             plan.SetupFeeInCents["USD"] = 100;
             plan.TaxExempt = false;
 
-            plan.Update();
+            plan.UpdateAsync();
 
             plan = Plans.Get(plan.PlanCode);
             plan.UnitAmountInCents.Should().Contain("USD", 5000);
@@ -98,7 +98,7 @@ namespace Recurly.Test
             // Arrange
             var plan = new Plan(GetMockPlanCode(), GetMockPlanName()) {Description = "Test Delete"};
             plan.UnitAmountInCents.Add("USD", 100);
-            plan.Create();
+            plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             plan = Plans.Get(plan.PlanCode);
@@ -106,7 +106,7 @@ namespace Recurly.Test
             plan.UnitAmountInCents.Should().Contain("USD", 100);
 
             //Act
-            plan.Deactivate();
+            plan.DeactivateAsync();
 
             //Assert
             Action get = () => Plans.Get(plan.PlanCode);

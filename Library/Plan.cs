@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace Recurly
@@ -101,9 +102,9 @@ namespace Recurly
         /// <summary>
         /// Create a new plan in Recurly
         /// </summary>
-        public void Create()
+        public async Task CreateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 UrlPrefix,
                 WriteXml,
                 ReadXml);
@@ -112,9 +113,9 @@ namespace Recurly
         /// <summary>
         /// Update an existing plan in Recurly
         /// </summary>
-        public void Update()
+        public async Task UpdateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 UrlPrefix + Uri.EscapeUriString(PlanCode),
                 WriteXml);
         }
@@ -122,9 +123,9 @@ namespace Recurly
         /// <summary>
         /// Deletes this plan, making it inactive
         /// </summary>
-        public void Deactivate()
+        public async Task DeactivateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Delete, UrlPrefix + Uri.EscapeUriString(PlanCode));
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Delete, UrlPrefix + Uri.EscapeUriString(PlanCode));
         }
 
         /// <summary>
@@ -346,7 +347,7 @@ namespace Recurly
             if (BypassHostedConfirmation.HasValue)
                 xmlWriter.WriteElementString("bypass_hosted_confirmation", BypassHostedConfirmation.Value.AsString());
 
-            if(TaxExempt.HasValue)
+            if (TaxExempt.HasValue)
                 xmlWriter.WriteElementString("tax_exempt", TaxExempt.Value.AsString());
 
             xmlWriter.WriteStringIfValid("success_url", SuccessUrl);

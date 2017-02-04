@@ -156,7 +156,7 @@ namespace Recurly.Test
             {
                 try
                 {
-                    plan.Deactivate();
+                    plan.DeactivateAsync();
                 }
                 catch (RecurlyException)
                 {
