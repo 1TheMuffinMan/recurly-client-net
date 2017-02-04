@@ -42,9 +42,9 @@ namespace Recurly
         /// <summary>
         /// Create a new measured unit in Recurly
         /// </summary>
-        public void Create()
+        public async Task CreateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 UrlPrefix,
                 WriteXml,
                 ReadXml);
@@ -53,9 +53,9 @@ namespace Recurly
         /// <summary>
         /// Update an existing measured unit in Recurly
         /// </summary>
-        public void Update()
+        public async Task UpdateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 UrlPrefix + Uri.EscapeUriString(Id.ToString()),
                 WriteXml);
         }
@@ -63,9 +63,9 @@ namespace Recurly
         /// <summary>
         /// Deletes this measured unit
         /// </summary>
-        public void Delete()
+        public async Task Delete()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Delete,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Delete,
                 UrlPrefix + Uri.EscapeUriString(Id.ToString()));
         }
 
