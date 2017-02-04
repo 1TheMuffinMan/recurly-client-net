@@ -12,7 +12,7 @@ namespace Recurly.Test
         {
             var acct = await CreateNewAccountWithBillingInfoAsync();
             var transaction = new Transaction(acct, 5000, "USD");
-            transaction.CreateAsync();
+            await transaction.CreateAsync();
 
             var fromService = Transactions.Get(transaction.Uuid);
 
@@ -26,7 +26,7 @@ namespace Recurly.Test
             var transaction = new Transaction(account, 5000, "USD");
             transaction.Description = "Description";
 
-            transaction.CreateAsync();
+            await transaction.CreateAsync();
 
             transaction.CreatedAt.Should().NotBe(default(DateTime));
             
@@ -44,48 +44,48 @@ namespace Recurly.Test
             var acct = await CreateNewAccountWithBillingInfoAsync();
             var transaction = new Transaction(acct.AccountCode, 3000, "USD");
 
-            transaction.CreateAsync();
+            await transaction.CreateAsync();
 
             transaction.CreatedAt.Should().NotBe(default(DateTime));
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void CreateTransactionExistingAccountNewBillingInfo()
+        public async Task CreateTransactionExistingAccountNewBillingInfo()
         {
             var account = new Account(GetUniqueAccountCode())
             {
                 FirstName = "John",
                 LastName = "Smith"
             };
-            account.CreateAsync();
+            await account.CreateAsync();
             account.BillingInfo = NewBillingInfo(account);
             var transaction = new Transaction(account, 5000, "USD");
 
-            transaction.CreateAsync();
+            await transaction.CreateAsync();
 
             transaction.CreatedAt.Should().NotBe(default(DateTime));
         }
 
         [Fact(Skip = "This feature is deprecated and no longer supported for accounts where line item refunds are turned on.")]
-        public void RefundTransactionFull()
+        public async Task RefundTransactionFull()
         {
             var acct = NewAccountWithBillingInfo();
             var transaction = new Transaction(acct, 5000, "USD");
-            transaction.CreateAsync();
+            await transaction.CreateAsync();
 
-            transaction.RefundAsync();
+            await transaction.RefundAsync();
 
             transaction.Status.Should().Be(Transaction.TransactionState.Voided);
         }
 
         [Fact(Skip = "This feature is deprecated and no longer supported for accounts where line item refunds are turned on.")]
-        public void RefundTransactionPartial()
+        public async Task RefundTransactionPartial()
         {
             var account = NewAccountWithBillingInfo();
             var transaction = new Transaction(account, 5000, "USD");
-            transaction.CreateAsync();
+            await transaction.CreateAsync();
 
-            transaction.RefundAsync(2500);
+            await transaction.RefundAsync(2500);
 
             account.GetTransactions().Should().HaveCount(2);
         }

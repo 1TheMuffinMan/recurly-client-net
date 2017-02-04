@@ -82,7 +82,7 @@ namespace Recurly
             Method = method;
             BaseUrl = url;
 
-            GetItems();
+            GetItems().GetAwaiter().GetResult();
         }
 
         public async Task GetItems()

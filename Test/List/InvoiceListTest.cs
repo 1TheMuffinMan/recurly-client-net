@@ -15,7 +15,7 @@ namespace Recurly.Test
                 var acct = await CreateNewAccountAsync();
 
                 var adjustment = acct.NewAdjustment("USD", 500 + x, "Test Charge");
-                adjustment.CreateAsync();
+                await adjustment.CreateAsync();
 
                 var invoice = acct.InvoicePendingCharges();
 
@@ -25,11 +25,11 @@ namespace Recurly.Test
                 }
                 else if (x == 3 || x == 4)
                 {
-                    invoice.MarkFailedAsync();
+                    await invoice.MarkFailedAsync();
                 }
                 else
                 {
-                    invoice.MarkSuccessfulAsync();
+                    await invoice.MarkSuccessfulAsync();
                 }
             }
 
@@ -44,7 +44,7 @@ namespace Recurly.Test
             {
                 var account = await CreateNewAccountAsync();
                 var adjustment = account.NewAdjustment("USD", 500 + x, "Test Charge");
-                adjustment.CreateAsync();
+                await adjustment.CreateAsync();
                 account.InvoicePendingCharges();
             }
 
@@ -59,9 +59,9 @@ namespace Recurly.Test
             {
                 var acct = await CreateNewAccountAsync();
                 var adjustment = acct.NewAdjustment("USD", 500 + x, "Test Charge");
-                adjustment.CreateAsync();
+                await adjustment.CreateAsync();
                 var invoice = acct.InvoicePendingCharges();
-                invoice.MarkSuccessfulAsync();
+                await invoice.MarkSuccessfulAsync();
             }
 
             var list = Invoices.List(Invoice.InvoiceState.Collected);
@@ -75,9 +75,9 @@ namespace Recurly.Test
             {
                 var acct = await CreateNewAccountAsync();
                 var adjustment = acct.NewAdjustment("USD", 500 + x, "Test Charge");
-                adjustment.CreateAsync();
+                await adjustment.CreateAsync();
                 var invoice = acct.InvoicePendingCharges();
-                invoice.MarkFailedAsync();
+                await invoice.MarkFailedAsync();
             }
 
             var list = Invoices.List(Invoice.InvoiceState.Failed);
@@ -91,7 +91,7 @@ namespace Recurly.Test
             {
                 var acct = await CreateNewAccountAsync();
                 var adjustment = acct.NewAdjustment("USD", 500 + x, "Test charge");
-                adjustment.CreateAsync();
+                await adjustment.CreateAsync();
                 acct.InvoicePendingCharges();
             }
 
@@ -104,7 +104,7 @@ namespace Recurly.Test
         {
             var account = await CreateNewAccountWithACHBillingInfo();
             var adjustment = account.NewAdjustment("USD", 510, "ACH invoice test");
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
             account.InvoicePendingCharges();
 
             //The invoice starts out as open and then changes to processing 
@@ -123,16 +123,16 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 450, "Test Charge #1");
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
-            invoice.MarkSuccessfulAsync();
+            await invoice.MarkSuccessfulAsync();
 
             adjustment = account.NewAdjustment("USD", 350, "Test Charge #2");
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             invoice = account.InvoicePendingCharges();
-            invoice.MarkFailedAsync();
+            await invoice.MarkFailedAsync();
 
             var list = Invoices.List(account.AccountCode);
             Assert.Equal(2, list.Count);

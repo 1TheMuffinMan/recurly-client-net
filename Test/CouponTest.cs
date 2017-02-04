@@ -20,10 +20,10 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void ListCouponsRedeemable()
+        public async Task ListCouponsRedeemable()
         {
             var coupon1 = CreateNewCoupon(1);
-            coupon1.DeactivateAsync();
+            await coupon1.DeactivateAsync();
             CreateNewCoupon(2);
 
             var coupons = Coupons.List(Coupon.CouponState.Redeemable);
@@ -31,14 +31,14 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void CouponsCanBeCreated()
+        public async Task CouponsCanBeCreated()
         {
             var discounts = new Dictionary<string, int> {{"USD", 100}};
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), discounts)
             {
                 MaxRedemptions = 1
             };
-            coupon.CreateAsync();
+            await coupon.CreateAsync();
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
             var coupons = Coupons.List().All;
@@ -136,7 +136,7 @@ namespace Recurly.Test
             var plan = new Plan(GetMockPlanCode("coupon plan"), "Coupon Test");
             plan.SetupFeeInCents.Add("USD", 500);
             plan.UnitAmountInCents.Add("USD", 5000);
-            plan.CreateAsync();
+            await plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), new Dictionary<string, int>());

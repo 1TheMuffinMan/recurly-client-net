@@ -54,7 +54,7 @@ namespace Recurly
 
             BaseUrl = url.Scheme + "://" + url.Host + ":" + url.Port + url.AbsolutePath + "?cursor=" + qscoll.Get("cursor");
             
-            GetItems();
+            GetItems().GetAwaiter().GetResult();
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Recurly.Test
             info.LastName = "Smith";
             info.ExpirationMonth = DateTime.Now.AddMonths(3).Month;
             info.ExpirationYear = DateTime.Now.AddYears(3).Year;
-            info.UpdateAsync();
+            await info.UpdateAsync();
 
             var get = await Accounts.GetAsync(account.AccountCode);
 
@@ -41,7 +41,7 @@ namespace Recurly.Test
 
             try
             {
-                billingInfo.UpdateAsync();
+                await billingInfo.UpdateAsync();
             }
             catch (NotFoundException exception)
             {
@@ -73,8 +73,7 @@ namespace Recurly.Test
         {
             var newAcct = await CreateNewAccountAsync();
 
-            Action getInfo = () => BillingInfo.GetAsync(newAcct.AccountCode);
-            getInfo.ShouldThrow<NotFoundException>();
+            await Assert.ThrowsAsync<NotFoundException>(() => BillingInfo.GetAsync(newAcct.AccountCode));
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]

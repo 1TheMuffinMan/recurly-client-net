@@ -5,7 +5,9 @@ using System.Xml;
 
 namespace Recurly
 {
+#pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
     public class AddOn : RecurlyEntity
+#pragma warning restore CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
     {
         public enum Type
         {

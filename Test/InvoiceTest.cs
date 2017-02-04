@@ -12,7 +12,7 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 5000, "Test Charge");
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
             Assert.Equal("usst", invoice.TaxType);
@@ -29,7 +29,7 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 5000, "Test Charge");
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
 
@@ -44,13 +44,13 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 5000, "Test Charge");
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             adjustment = account.NewAdjustment("USD", 5000, "Test Charge 2");
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             adjustment = account.NewAdjustment("USD", -2500, "Test Credit");
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
 
@@ -64,11 +64,11 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 3999, "Test Charge");
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
 
-            invoice.MarkSuccessfulAsync();
+            await invoice.MarkSuccessfulAsync();
 
             Assert.Equal(1, invoice.Adjustments.Count);
 
@@ -81,10 +81,10 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 3999, "Test Charge");
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
-            invoice.MarkFailedAsync();
+            await invoice.MarkFailedAsync();
             invoice.State.Should().Be(Invoice.InvoiceState.Failed);
             Assert.NotNull(invoice.ClosedAt);
         }
@@ -95,11 +95,11 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 3999, "Test Charge");
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
 
-            invoice.MarkSuccessfulAsync();
+            await invoice.MarkSuccessfulAsync();
 
             invoice.State.Should().Be(Invoice.InvoiceState.Collected);
 
@@ -123,13 +123,13 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment1 = account.NewAdjustment("USD", 1, "Test Charge 1");
-            adjustment1.CreateAsync();
+            await adjustment1.CreateAsync();
 
             var adjustment2 = account.NewAdjustment("USD", 2, "Test Charge 2", 2);
-            adjustment2.CreateAsync();
+            await adjustment2.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
-            invoice.MarkSuccessfulAsync();
+            await invoice.MarkSuccessfulAsync();
 
             System.Threading.Thread.Sleep(2000); // hack
 
@@ -157,11 +157,11 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 3999, "Test Charge");
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
 
-            invoice.MarkSuccessfulAsync();
+            await invoice.MarkSuccessfulAsync();
 
             invoice.State.Should().Be(Invoice.InvoiceState.Collected);
 

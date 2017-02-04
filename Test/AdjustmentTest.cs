@@ -58,10 +58,10 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 5000, "Charge", 1);
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             adjustment = account.NewAdjustment("USD", -1492, "Credit", 1);
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             account.InvoicePendingCharges();
 
@@ -100,10 +100,10 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 3456, "Charge", 1);
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             adjustment = account.NewAdjustment("USD", -3456, "Charge", 1);
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             var adjustments = await account.GetAdjustmentsAsync(Adjustment.AdjustmentType.Credit);
             adjustments.Should().HaveCount(1);
@@ -116,10 +116,10 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 1234);
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             adjustment = account.NewAdjustment("USD", -5678, "list adjustments", 1);
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             account.InvoicePendingCharges();
 
@@ -134,10 +134,10 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 1234);
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             adjustment = account.NewAdjustment("USD", -5678, "");
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
 
             var adjustments = await account.GetAdjustmentsAsync(state: Adjustment.AdjustmentState.Pending);
@@ -156,7 +156,7 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 1234);
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             adjustment.Uuid.Should().NotBeNullOrEmpty();
 

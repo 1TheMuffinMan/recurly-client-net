@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Recurly.Configuration;
 using Xunit;
@@ -16,10 +17,12 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void ListActive()
+        public async Task ListActive()
         {
-            CreateNewAccountAsync();
-            CreateNewAccountAsync();
+            var tasks = new Task[2];
+            tasks[0] = CreateNewAccountAsync();
+            tasks[1] = CreateNewAccountAsync();
+            await Task.WhenAll(tasks);
 
             var accounts = Accounts.List(AccountState.Active);
             accounts.Should().HaveCount(x => x >= 2);
@@ -28,8 +31,17 @@ namespace Recurly.Test
         [RecurlyFact(TestEnvironment.Type.Integration)]
         public async Task ListClosed()
         {
-            (await CreateNewAccountAsync()).CloseAsync();
-            (await CreateNewAccountAsync()).CloseAsync();
+            var accountTasks = new List<Task<Account>>(2)
+            {
+                [0] = CreateNewAccountAsync(),
+                [1] = CreateNewAccountAsync()
+            };
+            await Task.WhenAll(accountTasks);
+
+            var closeTasks = new Task[2];
+            closeTasks[0] = (await accountTasks[0]).CloseAsync();
+            closeTasks[1] = (await accountTasks[1]).CloseAsync();
+            await Task.WhenAll(closeTasks);
 
             var accounts = Accounts.List(AccountState.Closed);
             accounts.Should().HaveCount(x => x >= 2);
@@ -41,7 +53,7 @@ namespace Recurly.Test
             var acct = await CreateNewAccountAsync();
 
             var adjustment = acct.NewAdjustment("USD", 5000, "Past Due", 1);
-            adjustment.CreateAsync();
+            await adjustment.CreateAsync();
 
             acct.InvoicePendingCharges();
 
