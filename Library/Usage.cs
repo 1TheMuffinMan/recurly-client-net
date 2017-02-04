@@ -51,9 +51,9 @@ namespace Recurly
         /// <summary>
         /// Log a usage record in Recurly
         /// </summary>
-        public void Create()
+        public async Task CreateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 UrlPrefix(),
                 WriteXml,
                 ReadXml);
@@ -62,9 +62,9 @@ namespace Recurly
         /// <summary>
         /// Update a usage record in Recurly
         /// </summary>
-        public void Update()
+        public async Task UpdateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 UrlPrefix() + "/" + Id.ToString(),
                 WriteXml);
         }
@@ -72,9 +72,9 @@ namespace Recurly
         /// <summary>
         /// Deletes this usage record
         /// </summary>
-        public void Delete()
+        public async Task DeleteAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Delete, UrlPrefix() + "/" + Id.ToString());
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Delete, UrlPrefix() + "/" + Id.ToString());
         }
 
         private String UrlPrefix()
