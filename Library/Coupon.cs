@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace Recurly
@@ -162,24 +163,24 @@ namespace Recurly
         /// <summary>
         /// Creates this coupon.
         /// </summary>
-        public void Create()
+        public async Task CreateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 UrlPrefix, 
                 WriteXml,
                 ReadXml);
         }
 
-        public void Update()
+        public async Task UpdateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 UrlPrefix + Uri.EscapeUriString(CouponCode),
                 WriteXmlUpdate);
         }
 
-        public void Restore()
+        public async Task RestoreAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 UrlPrefix + Uri.EscapeUriString(CouponCode) + "/restore",
                 WriteXmlUpdate);
         }
@@ -187,29 +188,29 @@ namespace Recurly
         /// <summary>
         /// Deactivates this coupon.
         /// </summary>
-        public void Deactivate()
+        public async Task DeactivateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Delete,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Delete,
                 UrlPrefix + Uri.EscapeUriString(CouponCode));
         }
 
-        public RecurlyList<Coupon> GetUniqueCouponCodes()
+        public async Task<RecurlyList<Coupon>> GetUniqueCouponCodesAsync()
         {
             var coupons = new CouponList();
 
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Get,
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Get,
                 memberUrl() + "/unique_coupon_codes/",
                 coupons.ReadXmlList);
 
             return statusCode == HttpStatusCode.NotFound ? null : coupons;
         }
 
-        public RecurlyList<Coupon> Generate(int amount)
+        public async Task<RecurlyList<Coupon>> GenerateAsync(int amount)
         {
             NumberOfUniqueCodes = amount;
             var coupons = new CouponList();
 
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 memberUrl() + "/generate/",
                 this.WriteGenerateXml,
                 coupons.ReadFromLocation);
@@ -523,11 +524,11 @@ namespace Recurly
         /// </summary>
         /// <param name="couponCode">Coupon code</param>
         /// <returns></returns>
-        public static Coupon Get(string couponCode)
+        public static async Task<Coupon> GetAsync(string couponCode)
         {
             var coupon = new Coupon();
 
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Get,
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Get,
                 Coupon.UrlPrefix + Uri.EscapeUriString(couponCode),
                 coupon.ReadXml);
 

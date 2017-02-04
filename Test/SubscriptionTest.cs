@@ -127,7 +127,7 @@ namespace Recurly.Test
             PlansToDeactivateOnDispose.Add(plan);
 
             var coupon = new Coupon(GetMockCouponCode(), "Sub Test " + GetMockCouponName(), 10);
-            coupon.Create();
+            coupon.CreateAsync();
 
             var account = await CreateNewAccountWithBillingInfoAsync();
 

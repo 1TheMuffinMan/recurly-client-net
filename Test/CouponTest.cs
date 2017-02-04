@@ -23,7 +23,7 @@ namespace Recurly.Test
         public void ListCouponsRedeemable()
         {
             var coupon1 = CreateNewCoupon(1);
-            coupon1.Deactivate();
+            coupon1.DeactivateAsync();
             CreateNewCoupon(2);
 
             var coupons = Coupons.List(Coupon.CouponState.Redeemable);
@@ -38,7 +38,7 @@ namespace Recurly.Test
             {
                 MaxRedemptions = 1
             };
-            coupon.Create();
+            coupon.CreateAsync();
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
             var coupons = Coupons.List().All;
@@ -56,7 +56,7 @@ namespace Recurly.Test
             {
                 MaxRedemptions = 1
             };
-            coupon.Create();
+            coupon.CreateAsync();
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -64,7 +64,7 @@ namespace Recurly.Test
             var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
             redemption.CreatedAt.Should().NotBe(default(DateTime));
 
-            var fromService = Coupons.Get(coupon.CouponCode);
+            var fromService = Coupons.GetAsync(coupon.CouponCode);
             fromService.Should().NotBeNull();
 
             var expiredCoupons = Coupons.List(Coupon.CouponState.Expired);
@@ -83,7 +83,7 @@ namespace Recurly.Test
             {
                 MaxRedemptions = 1
             };
-            coupon.Create();
+            coupon.CreateAsync();
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -91,7 +91,7 @@ namespace Recurly.Test
             var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
             redemption.CreatedAt.Should().NotBe(default(DateTime));
 
-            var fromService = Coupons.Get(coupon.CouponCode);
+            var fromService = Coupons.GetAsync(coupon.CouponCode);
             fromService.Should().NotBeNull();
 
             var expiredCoupons = Coupons.List(Coupon.CouponState.Expired);
@@ -100,14 +100,14 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void CreateCouponPercent()
+        public async Task CreateCouponPercentAsync()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), 10);
-            coupon.Create();
+            coupon.CreateAsync();
 
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
-            coupon = Coupons.Get(coupon.CouponCode);
+            coupon = await Coupons.GetAsync(coupon.CouponCode);
 
             coupon.Should().NotBeNull();
             coupon.DiscountPercent.Should().Be(10);
@@ -115,15 +115,15 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void CreateCouponDollars()
+        public async Task CreateCouponDollars()
         {
             var discounts = new Dictionary<string, int> {{"USD", 100}, {"EUR", 50}};
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), discounts);
 
-            coupon.Create();
+            coupon.CreateAsync();
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
-            coupon = Coupons.Get(coupon.CouponCode);
+            coupon = await Coupons.GetAsync(coupon.CouponCode);
 
             coupon.Should().NotBeNull();
             coupon.DiscountInCents.Should().Equal(discounts);
@@ -131,7 +131,7 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void CreateCouponPlan()
+        public async Task CreateCouponPlan()
         {
             var plan = new Plan(GetMockPlanCode("coupon plan"), "Coupon Test");
             plan.SetupFeeInCents.Add("USD", 500);
@@ -143,34 +143,32 @@ namespace Recurly.Test
             coupon.DiscountInCents.Add("USD", 100);
             coupon.Plans.Add(plan.PlanCode);
 
-            Action a = coupon.Create;
-            a.ShouldNotThrow();
+            await coupon.CreateAsync();
             Assert.Equal(1, coupon.Plans.Count);
 
             //plan.Deactivate(); BaseTest.Dispose() handles this
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void Coupon_plan_must_exist()
+        public async Task Coupon_plan_must_exist()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), 10);
             coupon.Plans.Add("notrealplan");
 
-            Action create = coupon.Create;
-            create.ShouldThrow<ValidationException>();
+            await Assert.ThrowsAsync<ValidationException>(coupon.CreateAsync);
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void DeactivateCoupon()
+        public async Task DeactivateCoupon()
         {
             var discounts = new Dictionary<string, int> { { "USD", 100 }, { "EUR", 50 } };
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), discounts);
-            coupon.Create();
+            coupon.CreateAsync();
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
-            coupon.Deactivate();
+            coupon.DeactivateAsync();
 
-            coupon = Coupons.Get(coupon.CouponCode);
+            coupon = await Coupons.GetAsync(coupon.CouponCode);
             coupon.Should().NotBeNull();
             coupon.State.Should().Be(Coupon.CouponState.Inactive);
         }

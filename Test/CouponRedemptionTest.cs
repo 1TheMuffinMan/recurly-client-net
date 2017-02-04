@@ -13,7 +13,7 @@ namespace Recurly.Test
         public async Task RedeemCoupon()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), 10);
-            coupon.Create();
+            coupon.CreateAsync();
 
             var account = await CreateNewAccountAsync();
             account.CreatedAt.Should().NotBe(default(DateTime));
@@ -30,7 +30,7 @@ namespace Recurly.Test
         public async Task LookupRedemption()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), 10);
-            coupon.Create();
+            coupon.CreateAsync();
 
             var account = await CreateNewAccountAsync();
             account.CreatedAt.Should().NotBe(default(DateTime));
@@ -49,7 +49,7 @@ namespace Recurly.Test
         public async Task RemoveCoupon()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), 10);
-            coupon.Create();
+            coupon.CreateAsync();
 
             var account = await CreateNewAccountAsync();
             account.CreatedAt.Should().NotBe(default(DateTime));
@@ -68,7 +68,7 @@ namespace Recurly.Test
         {
             var discounts = new Dictionary<string, int> { { "USD", 1000 } };
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), discounts);
-            coupon.Create();
+            coupon.CreateAsync();
 
             var plan = new Plan(GetMockPlanCode(), GetMockPlanCode())
             {

@@ -195,7 +195,7 @@ namespace Recurly
         /// </summary>
         public Coupon Coupon
         {
-            get { return _coupon ?? (_coupon = Recurly.Coupons.Get(_couponCode)); }
+            get { return _coupon ?? (_coupon = Recurly.Coupons.GetAsync(_couponCode).GetAwaiter().GetResult()); }
             set
             {
                 _coupon = value;
@@ -219,7 +219,7 @@ namespace Recurly
 
                     for (int i = 0; i<_couponCodes.Length; i++)
                     {
-                        _coupons[i] = Recurly.Coupons.Get(_couponCodes[i]);
+                        _coupons[i] = Recurly.Coupons.GetAsync(_couponCodes[i]).GetAwaiter().GetResult();
                     }
                 }
 
