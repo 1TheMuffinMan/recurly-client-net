@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace Recurly
@@ -41,33 +42,30 @@ namespace Recurly
         /// </summary>
         /// <param name="accountCode"></param>
         /// <param name="currency"></param>
-        internal static CouponRedemption Redeem(string accountCode, string couponCode, string currency, string subscriptionUuid=null)
+        internal static async Task<CouponRedemption> RedeemAsync(string accountCode, string couponCode, string currency, string subscriptionUuid=null)
         {
             var cr = new CouponRedemption {AccountCode = accountCode, Currency = currency, SubscriptionUuid = subscriptionUuid};
 
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                "/coupons/" + Uri.EscapeUriString(couponCode) + "/redeem",
                cr.WriteXml,
                cr.ReadXml);
 
             return cr;
-
         }
 
         /// <summary>
         /// Removes a coupon from an account
         /// </summary>
-        public void Delete()
+        public async Task DeleteAsync()
         {
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Delete,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Delete,
                 "/accounts/" + Uri.EscapeUriString(AccountCode) +
                 "/redemptions/" + Uri.EscapeUriString(Uuid));
             AccountCode = null;
             CouponCode = null;
             Currency = null;
         }
-
-
 
         #region Read and Write XML documents
 

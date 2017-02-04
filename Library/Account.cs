@@ -280,9 +280,9 @@ namespace Recurly
         /// <param name="couponCode"></param>
         /// <param name="currency"></param>
         /// <returns></returns>
-        public CouponRedemption RedeemCoupon(string couponCode, string currency, string subscriptionUuid = null)
+        public async Task<CouponRedemption> RedeemCouponAsync(string couponCode, string currency, string subscriptionUuid = null)
         {
-            return CouponRedemption.Redeem(AccountCode, couponCode, currency, subscriptionUuid);
+            return await CouponRedemption.RedeemAsync(AccountCode, couponCode, currency, subscriptionUuid);
         }
 
         /// <summary>

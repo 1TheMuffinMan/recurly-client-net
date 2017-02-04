@@ -13,12 +13,12 @@ namespace Recurly.Test
         public async Task RedeemCoupon()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), 10);
-            coupon.CreateAsync();
+            await coupon.CreateAsync();
 
             var account = await CreateNewAccountAsync();
             account.CreatedAt.Should().NotBe(default(DateTime));
 
-            var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
+            var redemption = await account.RedeemCouponAsync(coupon.CouponCode, "USD");
 
             redemption.Should().NotBeNull();
             redemption.Currency.Should().Be("USD");
@@ -30,12 +30,12 @@ namespace Recurly.Test
         public async Task LookupRedemption()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), 10);
-            coupon.CreateAsync();
+            await coupon.CreateAsync();
 
             var account = await CreateNewAccountAsync();
             account.CreatedAt.Should().NotBe(default(DateTime));
 
-            var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
+            var redemption = await account.RedeemCouponAsync(coupon.CouponCode, "USD");
             redemption.Should().NotBeNull();
 
             redemption = await account.GetActiveRedemptionAsync();
@@ -49,15 +49,15 @@ namespace Recurly.Test
         public async Task RemoveCoupon()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), 10);
-            coupon.CreateAsync();
+            await coupon.CreateAsync();
 
             var account = await CreateNewAccountAsync();
             account.CreatedAt.Should().NotBe(default(DateTime));
 
-            var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
+            var redemption = await account.RedeemCouponAsync(coupon.CouponCode, "USD");
             redemption.Should().NotBeNull();
 
-            redemption.Delete();
+            await redemption.DeleteAsync();
 
             var activeRedemption = account.GetActiveRedemptionAsync();
             activeRedemption.Should().Be(null);
@@ -68,7 +68,7 @@ namespace Recurly.Test
         {
             var discounts = new Dictionary<string, int> { { "USD", 1000 } };
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), discounts);
-            coupon.CreateAsync();
+            await coupon.CreateAsync();
 
             var plan = new Plan(GetMockPlanCode(), GetMockPlanCode())
             {
@@ -80,7 +80,7 @@ namespace Recurly.Test
 
             var account = await CreateNewAccountWithBillingInfoAsync();
 
-            var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
+            var redemption = account.RedeemCouponAsync(coupon.CouponCode, "USD");
 
             var sub = new Subscription(account, plan, "USD", coupon.CouponCode);
             await sub.CreateAsync();

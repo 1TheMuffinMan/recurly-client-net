@@ -56,12 +56,12 @@ namespace Recurly.Test
             {
                 MaxRedemptions = 1
             };
-            coupon.CreateAsync();
+            await coupon.CreateAsync();
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
             var account = await CreateNewAccountWithBillingInfoAsync();
 
-            var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
+            var redemption = await account.RedeemCouponAsync(coupon.CouponCode, "USD");
             redemption.CreatedAt.Should().NotBe(default(DateTime));
 
             var fromService = Coupons.GetAsync(coupon.CouponCode);
@@ -83,12 +83,12 @@ namespace Recurly.Test
             {
                 MaxRedemptions = 1
             };
-            coupon.CreateAsync();
+            await coupon.CreateAsync();
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
             var account = await CreateNewAccountWithBillingInfoAsync();
 
-            var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
+            var redemption = await account.RedeemCouponAsync(coupon.CouponCode, "USD");
             redemption.CreatedAt.Should().NotBe(default(DateTime));
 
             var fromService = Coupons.GetAsync(coupon.CouponCode);
@@ -103,7 +103,7 @@ namespace Recurly.Test
         public async Task CreateCouponPercentAsync()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), 10);
-            coupon.CreateAsync();
+            await coupon.CreateAsync();
 
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
@@ -120,7 +120,7 @@ namespace Recurly.Test
             var discounts = new Dictionary<string, int> {{"USD", 100}, {"EUR", 50}};
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), discounts);
 
-            coupon.CreateAsync();
+            await coupon.CreateAsync();
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
             coupon = await Coupons.GetAsync(coupon.CouponCode);
@@ -163,10 +163,10 @@ namespace Recurly.Test
         {
             var discounts = new Dictionary<string, int> { { "USD", 100 }, { "EUR", 50 } };
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), discounts);
-            coupon.CreateAsync();
+            await coupon.CreateAsync();
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
-            coupon.DeactivateAsync();
+            await coupon.DeactivateAsync();
 
             coupon = await Coupons.GetAsync(coupon.CouponCode);
             coupon.Should().NotBeNull();
