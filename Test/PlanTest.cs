@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 
@@ -7,12 +8,13 @@ namespace Recurly.Test
     public class PlanTest : BaseTest
     {
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void LookupPlan()
+        public async Task LookupPlan()
         {
             var plan = new Plan(GetMockPlanCode(), GetMockPlanName()) {Description = "Test Lookup"};
             plan.UnitAmountInCents.Add("USD", 100);
             plan.TaxExempt = true;
-            plan.CreateAsync();
+            plan.TotalBillingCycles = 6;
+            await plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             plan.CreatedAt.Should().NotBe(default(DateTime));
@@ -26,11 +28,11 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void CreatePlanSmall()
+        public async Task CreatePlanSmall()
         {
             var plan = new Plan(GetMockPlanCode(), GetMockPlanName());
             plan.SetupFeeInCents.Add("USD", 100);
-            plan.CreateAsync();
+            await plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             plan.CreatedAt.Should().NotBe(default(DateTime));
@@ -38,7 +40,7 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void CreatePlan()
+        public async Task CreatePlan()
         {
             var plan = new Plan(GetMockPlanCode(), GetMockPlanName())
             {
@@ -55,7 +57,7 @@ namespace Recurly.Test
                 PlanIntervalLength = 180
             };
             plan.SetupFeeInCents.Add("USD", 500);
-            plan.CreateAsync();
+            await plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             plan.CreatedAt.Should().NotBe(default(DateTime));
@@ -73,18 +75,18 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void UpdatePlan()
+        public async Task UpdatePlan()
         {
             var plan = new Plan(GetMockPlanCode(), GetMockPlanName()) {Description = "Test Update"};
             plan.UnitAmountInCents.Add("USD", 100);
-            plan.CreateAsync();
+            await plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             plan.UnitAmountInCents["USD"] = 5000;
             plan.SetupFeeInCents["USD"] = 100;
             plan.TaxExempt = false;
 
-            plan.UpdateAsync();
+            await plan.UpdateAsync();
 
             plan = Plans.Get(plan.PlanCode);
             plan.UnitAmountInCents.Should().Contain("USD", 5000);
@@ -93,12 +95,12 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void DeactivatePlan()
+        public async Task DeactivatePlan()
         {
             // Arrange
             var plan = new Plan(GetMockPlanCode(), GetMockPlanName()) {Description = "Test Delete"};
             plan.UnitAmountInCents.Add("USD", 100);
-            plan.CreateAsync();
+            await plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             plan = Plans.Get(plan.PlanCode);
@@ -106,7 +108,7 @@ namespace Recurly.Test
             plan.UnitAmountInCents.Should().Contain("USD", 100);
 
             //Act
-            plan.DeactivateAsync();
+            await plan.DeactivateAsync();
 
             //Assert
             Action get = () => Plans.Get(plan.PlanCode);

@@ -14,7 +14,7 @@ namespace Recurly.Test
             var transaction = new Transaction(acct, 5000, "USD");
             await transaction.CreateAsync();
 
-            var fromService = Transactions.Get(transaction.Uuid);
+            var fromService = await Transactions.Get(transaction.Uuid);
 
             transaction.Should().Be(fromService);
         }

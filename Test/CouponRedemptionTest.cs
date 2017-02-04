@@ -59,7 +59,7 @@ namespace Recurly.Test
 
             await redemption.DeleteAsync();
 
-            var activeRedemption = account.GetActiveRedemptionAsync();
+            var activeRedemption = await account.GetActiveRedemptionAsync();
             activeRedemption.Should().Be(null);
         }
 
@@ -80,7 +80,7 @@ namespace Recurly.Test
 
             var account = await CreateNewAccountWithBillingInfoAsync();
 
-            var redemption = account.RedeemCouponAsync(coupon.CouponCode, "USD");
+            var redemption = await account.RedeemCouponAsync(coupon.CouponCode, "USD");
 
             var sub = new Subscription(account, plan, "USD", coupon.CouponCode);
             await sub.CreateAsync();
@@ -92,7 +92,7 @@ namespace Recurly.Test
             invoices.Should().NotBeEmpty();
 
             var invoice = await Invoices.GetAsync(invoices.First().InvoiceNumber);
-            var fromInvoice = invoice.GetRedemptionAsync();
+            var fromInvoice = await invoice.GetRedemptionAsync();
 
             redemption.Should().Be(fromInvoice);
         }

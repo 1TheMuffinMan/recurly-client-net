@@ -25,7 +25,7 @@ namespace Recurly.Test
             sub.ActivatedAt.Should().HaveValue().And.NotBe(default(DateTime));
             sub.State.Should().Be(Subscription.SubscriptionState.Active);
 
-            var fromService = Subscriptions.GetAsync(sub.Uuid);
+            var fromService = await Subscriptions.GetAsync(sub.Uuid);
 
             fromService.Should().Be(sub);
         }
@@ -67,7 +67,7 @@ namespace Recurly.Test
 
             var account = await CreateNewAccountWithBillingInfoAsync();
 
-            var coup = CreateNewCoupon(3);
+            var coup = await CreateNewCouponAsync(3);
             var sub = new Subscription(account, plan, "USD");
             sub.TotalBillingCycles = 5;
             sub.Coupon = coup;
@@ -293,12 +293,11 @@ namespace Recurly.Test
 
             var sub = new Subscription(account, plan, "USD");
             await sub.CreateAsync();
-            var renewal = DateTime.Now.AddMonths(3);
+            var renewal = DateTime.UtcNow.AddMonths(3);
 
             await sub.PostponeAsync(renewal);
 
-            var diff = renewal.Date.Subtract(sub.CurrentPeriodEndsAt.Value.Date).Days;
-            diff.Should().Be(1);
+            Assert.True(sub.CurrentPeriodEndsAt.Value.Date == renewal.Date);
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
@@ -315,7 +314,7 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var sub = new Subscription(account, plan, "USD");
-      
+
             await sub.CreateAsync();
 
             Dictionary<string, string> notes = new Dictionary<string, string>();
@@ -352,6 +351,7 @@ namespace Recurly.Test
                 };
                 plan.UnitAmountInCents.Add("USD", 100);
                 await plan.CreateAsync();
+                await Task.Delay(1000);
 
                 addon1 = plan.NewAddOn("addon1", "addon1");
                 addon1.DisplayQuantityOnHostedPage = true;
@@ -370,6 +370,7 @@ namespace Recurly.Test
                 };
                 plan2.UnitAmountInCents.Add("USD", 1900);
                 await plan2.CreateAsync();
+                await Task.Delay(1000);
 
                 addon2 = plan2.NewAddOn("addon1", "addon2");
                 addon2.DisplayQuantityOnHostedPage = true;
@@ -441,7 +442,7 @@ namespace Recurly.Test
                 };
                 plan.UnitAmountInCents.Add("USD", 100);
                 await plan.CreateAsync();
-
+                await Task.Delay(1000);
                 int numberOfAddons = 7;
 
                 for (int i = 0; i < numberOfAddons; ++i)
@@ -452,6 +453,7 @@ namespace Recurly.Test
                     addon.UnitAmountInCents.Add("USD", 1000 + i);
                     addon.DefaultQuantity = i + 1;
                     await addon.CreateAsync();
+
                     addons.Add(addon);
                 }
 

@@ -67,10 +67,10 @@ namespace Recurly.Test
             return info;
         }
 
-        protected Coupon CreateNewCoupon(int discountPercent)
+        protected async Task<Coupon> CreateNewCouponAsync(int discountPercent)
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), discountPercent);
-            coupon.CreateAsync();
+            await coupon.CreateAsync();
             return coupon;
         }
 
@@ -141,27 +141,29 @@ namespace Recurly.Test
             };
         }
 
-        public void Dispose()
+        public async void Dispose()
         {
-            Dispose(true);
+            await Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected virtual async Task Dispose(bool disposing)
         {
             if (!disposing) return;
             if (!PlansToDeactivateOnDispose.HasAny()) return;
-
+            var disposeTasks = new List<Task>();
             foreach (var plan in PlansToDeactivateOnDispose)
             {
                 try
                 {
-                    plan.DeactivateAsync();
+                    disposeTasks.Add(plan.DeactivateAsync());
                 }
                 catch (RecurlyException)
                 {
                 }
             }
+
+            await Task.WhenAll(disposeTasks);
         }
     }
 }

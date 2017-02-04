@@ -86,10 +86,9 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void FindNonExistentAccount()
+        public async Task FindNonExistentAccount()
         {
-            Action get = () => Accounts.GetAsync("totallynotfound!@#$");
-            get.ShouldThrow<NotFoundException>();
+            await Assert.ThrowsAsync<NotFoundException>(() => Accounts.GetAsync("totallynotfound!@#$"));
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]

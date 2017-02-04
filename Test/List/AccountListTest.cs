@@ -33,8 +33,8 @@ namespace Recurly.Test
         {
             var accountTasks = new List<Task<Account>>(2)
             {
-                [0] = CreateNewAccountAsync(),
-                [1] = CreateNewAccountAsync()
+                CreateNewAccountAsync(),
+                CreateNewAccountAsync()
             };
             await Task.WhenAll(accountTasks);
 

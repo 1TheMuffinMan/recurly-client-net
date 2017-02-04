@@ -9,10 +9,12 @@ namespace Recurly.Test
     public class CouponTest : BaseTest
     {
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void ListCoupons()
+        public async Task ListCoupons()
         {
-            CreateNewCoupon(1);
-            CreateNewCoupon(2);
+            var tasks = new Task[2];
+            tasks[0] = CreateNewCouponAsync(1);
+            tasks[1] = CreateNewCouponAsync(2);
+            await Task.WhenAll(tasks);
 
             var coupons = Coupons.List();
             coupons.Should().NotBeEmpty();
@@ -22,9 +24,9 @@ namespace Recurly.Test
         [RecurlyFact(TestEnvironment.Type.Integration)]
         public async Task ListCouponsRedeemable()
         {
-            var coupon1 = CreateNewCoupon(1);
+            var coupon1 = await CreateNewCouponAsync(1);
             await coupon1.DeactivateAsync();
-            CreateNewCoupon(2);
+            await CreateNewCouponAsync(2);
 
             var coupons = Coupons.List(Coupon.CouponState.Redeemable);
             coupons.Should().NotBeEmpty();
@@ -33,7 +35,7 @@ namespace Recurly.Test
         [RecurlyFact(TestEnvironment.Type.Integration)]
         public async Task CouponsCanBeCreated()
         {
-            var discounts = new Dictionary<string, int> {{"USD", 100}};
+            var discounts = new Dictionary<string, int> { { "USD", 100 } };
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), discounts)
             {
                 MaxRedemptions = 1
@@ -117,7 +119,7 @@ namespace Recurly.Test
         [RecurlyFact(TestEnvironment.Type.Integration)]
         public async Task CreateCouponDollars()
         {
-            var discounts = new Dictionary<string, int> {{"USD", 100}, {"EUR", 50}};
+            var discounts = new Dictionary<string, int> { { "USD", 100 }, { "EUR", 50 } };
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), discounts);
 
             await coupon.CreateAsync();
