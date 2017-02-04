@@ -63,7 +63,7 @@ namespace Recurly.Test
                 var sub = new Subscription(account, p, "USD");
                 sub.CreateAsync();
 
-                sub.Cancel();
+                sub.CancelAsync();
             }
 
             var subs = Subscriptions.List(Subscription.SubscriptionState.Canceled);

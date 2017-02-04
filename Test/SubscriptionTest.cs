@@ -25,7 +25,7 @@ namespace Recurly.Test
             sub.ActivatedAt.Should().HaveValue().And.NotBe(default(DateTime));
             sub.State.Should().Be(Subscription.SubscriptionState.Active);
 
-            var fromService = Subscriptions.Get(sub.Uuid);
+            var fromService = Subscriptions.GetAsync(sub.Uuid);
 
             fromService.Should().Be(sub);
         }
@@ -38,18 +38,18 @@ namespace Recurly.Test
                 Description = "Lookup Subscription With Pending Changes Test"
             };
             plan.UnitAmountInCents.Add("USD", 1500);
-            plan.CreateAsync();
+            await plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var sub = new Subscription(account, plan, "USD");
-            sub.CreateAsync();
+            await sub.CreateAsync();
             sub.UnitAmountInCents = 3000;
 
-            sub.ChangeSubscription(Subscription.ChangeTimeframe.Renewal);
+            await sub.ChangeSubscriptionAsync(Subscription.ChangeTimeframe.Renewal);
 
-            var newSubscription = Subscriptions.Get(sub.Uuid);
+            var newSubscription = await Subscriptions.GetAsync(sub.Uuid);
             newSubscription.PendingSubscription.Should().NotBeNull();
             newSubscription.PendingSubscription.UnitAmountInCents.Should().Be(3000);
         }
@@ -62,7 +62,7 @@ namespace Recurly.Test
                 Description = "Create Subscription Test"
             };
             plan.UnitAmountInCents.Add("USD", 100);
-            plan.CreateAsync();
+            await plan.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
@@ -74,7 +74,7 @@ namespace Recurly.Test
             Assert.Null(sub.TaxInCents);
             Assert.Null(sub.TaxType);
             Assert.Null(sub.TaxRate);
-            sub.CreateAsync();
+            await sub.CreateAsync();
 
             sub.ActivatedAt.Should().HaveValue().And.NotBe(default(DateTime));
             sub.State.Should().Be(Subscription.SubscriptionState.Active);
@@ -84,7 +84,7 @@ namespace Recurly.Test
             Assert.Equal("usst", sub.TaxType);
             Assert.Equal(0.0875M, sub.TaxRate.Value);
 
-            var sub1 = Subscriptions.Get(sub.Uuid);
+            var sub1 = await Subscriptions.GetAsync(sub.Uuid);
             Assert.Equal(5, sub1.TotalBillingCycles);
 
         }
@@ -154,18 +154,18 @@ namespace Recurly.Test
                 Description = "Update Subscription Plan 2"
             };
             plan2.UnitAmountInCents.Add("USD", 750);
-            plan2.CreateAsync();
+            await plan2.CreateAsync();
             PlansToDeactivateOnDispose.Add(plan2);
 
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var sub = new Subscription(account, plan, "USD");
-            sub.CreateAsync();
+            await sub.CreateAsync();
             sub.Plan = plan2;
 
-            sub.ChangeSubscription(); // change "Now" is default
+            sub.ChangeSubscriptionAsync(); // change "Now" is default
 
-            var newSubscription = Subscriptions.Get(sub.Uuid);
+            var newSubscription = await Subscriptions.GetAsync(sub.Uuid);
 
             newSubscription.PendingSubscription.Should().BeNull();
             newSubscription.Plan.Should().Be(plan2);
@@ -187,7 +187,7 @@ namespace Recurly.Test
             var sub = new Subscription(account, plan, "USD");
             sub.CreateAsync();
 
-            sub.Cancel();
+            sub.CancelAsync();
 
             sub.CanceledAt.Should().HaveValue().And.NotBe(default(DateTime));
             sub.State.Should().Be(Subscription.SubscriptionState.Canceled);
@@ -209,10 +209,10 @@ namespace Recurly.Test
             var sub = new Subscription(account, plan, "USD");
             sub.CreateAsync();
 
-            sub.Cancel();
+            sub.CancelAsync();
             sub.State.Should().Be(Subscription.SubscriptionState.Canceled);
 
-            sub.Reactivate();
+            sub.ReactivateAsync();
 
             sub.State.Should().Be(Subscription.SubscriptionState.Active);
         }
@@ -233,7 +233,7 @@ namespace Recurly.Test
             var sub = new Subscription(account, plan, "USD");
             sub.CreateAsync();
 
-            sub.Terminate(Subscription.RefundType.None);
+            sub.TerminateAsync(Subscription.RefundType.None);
             sub.State.Should().Be(Subscription.SubscriptionState.Expired);
         }
 
@@ -253,7 +253,7 @@ namespace Recurly.Test
             var sub = new Subscription(account, plan, "USD");
             sub.CreateAsync();
 
-            sub.Terminate(Subscription.RefundType.Partial);
+            sub.TerminateAsync(Subscription.RefundType.Partial);
             sub.State.Should().Be(Subscription.SubscriptionState.Expired);
         }
 
@@ -273,7 +273,7 @@ namespace Recurly.Test
             var sub = new Subscription(account, plan, "USD");
             sub.CreateAsync();
 
-            sub.Terminate(Subscription.RefundType.Full);
+            sub.TerminateAsync(Subscription.RefundType.Full);
 
             sub.State.Should().Be(Subscription.SubscriptionState.Expired);
         }
@@ -295,7 +295,7 @@ namespace Recurly.Test
             sub.CreateAsync();
             var renewal = DateTime.Now.AddMonths(3);
 
-            sub.Postpone(renewal);
+            sub.PostponeAsync(renewal);
 
             var diff = renewal.Date.Subtract(sub.CurrentPeriodEndsAt.Value.Date).Days;
             diff.Should().Be(1);
@@ -368,7 +368,7 @@ namespace Recurly.Test
                     Description = "Create Subscription Plan With Addons Test 2"
                 };
                 plan2.UnitAmountInCents.Add("USD", 1900);
-                plan2.CreateAsync();
+                await plan2.CreateAsync();
 
                 addon2 = plan2.NewAddOn("addon1", "addon2");
                 addon2.DisplayQuantityOnHostedPage = true;
@@ -383,7 +383,7 @@ namespace Recurly.Test
 
                 sub = new Subscription(account, plan, "USD");
                 sub.AddOns.Add(new SubscriptionAddOn("addon1", 100, 1)); // TODO allow passing just the addon code
-                sub.CreateAsync();
+                await sub.CreateAsync();
 
                 // confirm that Create() doesn't duplicate the AddOns
                 Assert.Equal(1, sub.AddOns.Count);
@@ -393,7 +393,7 @@ namespace Recurly.Test
 
                 // test changing the plan of a subscription
 
-                sub2 = Subscriptions.Get(sub.Uuid);
+                sub2 = await Subscriptions.GetAsync(sub.Uuid);
                 sub2.UnitAmountInCents = plan2.UnitAmountInCents["USD"];
                 sub2.Plan = plan2;
 
@@ -402,10 +402,10 @@ namespace Recurly.Test
                     addOn.UnitAmountInCents = plan2.UnitAmountInCents["USD"];
                 }
 
-                sub2.ChangeSubscription(Subscription.ChangeTimeframe.Now);
+                sub2.ChangeSubscriptionAsync(Subscription.ChangeTimeframe.Now);
 
                 // check if the changes were saved
-                sub3 = Subscriptions.Get(sub2.Uuid);
+                sub3 = await Subscriptions.GetAsync(sub2.Uuid);
                 sub3.UnitAmountInCents.Should().Equals(plan2.UnitAmountInCents["USD"]);
                 Assert.Equal(1, sub3.AddOns.Count);
                 foreach (var addOn in sub3.AddOns)
@@ -416,9 +416,9 @@ namespace Recurly.Test
             }
             finally
             {
-                if (sub != null) sub.Cancel();
-                if (plan2 != null) plan2.DeactivateAsync();
-                if (plan != null) plan.DeactivateAsync();
+                if (sub != null) await sub.CancelAsync();
+                if (plan2 != null) await plan2.DeactivateAsync();
+                if (plan != null) await plan.DeactivateAsync();
                 if (account != null) await account.CloseAsync();
             }
         }
@@ -516,7 +516,7 @@ namespace Recurly.Test
             {
                 try
                 {
-                    if (sub != null && sub.Uuid != null) sub.Cancel();
+                    if (sub != null && sub.Uuid != null) sub.CancelAsync();
                     if (plan != null) plan.DeactivateAsync();
                     if (account != null) await account.CloseAsync();
                 }
@@ -540,7 +540,7 @@ namespace Recurly.Test
             var sub = new Subscription(account, plan, "USD");
             sub.UnitAmountInCents = 100;
             Assert.Null(sub.TaxType);
-            sub.Preview();
+            sub.PreviewAsync();
             Assert.Equal("usst", sub.TaxType);
             Assert.Equal(Subscription.SubscriptionState.Active, sub.State);
 
@@ -548,11 +548,11 @@ namespace Recurly.Test
             Assert.Throws<Recurly.RecurlyException>(
                 delegate
                 {
-                    sub.Preview();
+                    sub.PreviewAsync();
                 }
             );
 
-            sub.Terminate(Subscription.RefundType.None);
+            sub.TerminateAsync(Subscription.RefundType.None);
             await account.CloseAsync();
         }
     }

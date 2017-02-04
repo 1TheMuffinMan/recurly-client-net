@@ -342,7 +342,7 @@ namespace Recurly
         /// Request that an update to a subscription take place
         /// </summary>
         /// <param name="timeframe">when the update should occur: now (default) or at renewal</param>
-        public void ChangeSubscription(ChangeTimeframe timeframe)
+        public async Task ChangeSubscriptionAsync(ChangeTimeframe timeframe)
         {
             Client.WriteXmlDelegate writeXmlDelegate;
 
@@ -351,24 +351,24 @@ namespace Recurly
             else
                 writeXmlDelegate = WriteChangeSubscriptionNowXml;
 
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 UrlPrefix + Uri.EscapeUriString(Uuid),
                 writeXmlDelegate,
                 ReadXml);
         }
 
-        public void ChangeSubscription()
+        public async Task ChangeSubscriptionAsync()
         {
-            ChangeSubscription(ChangeTimeframe.Now);
+            await ChangeSubscriptionAsync(ChangeTimeframe.Now);
         }
 
         /// <summary>
         /// Cancel an active subscription.  The subscription will not renew, but will continue to be active
         /// through the remainder of the current term.
         /// </summary>
-        public void Cancel()
+        public async Task CancelAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 UrlPrefix + Uri.EscapeUriString(Uuid) + "/cancel",
                 ReadXml);
         }
@@ -376,9 +376,9 @@ namespace Recurly
         /// <summary>
         /// Reactivate a canceled subscription.  The subscription will renew at the end of its current term.
         /// </summary>
-        public void Reactivate()
+        public async Task ReactivateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 UrlPrefix + Uri.EscapeUriString(Uuid) + "/reactivate",
                 ReadXml);
         }
@@ -387,9 +387,9 @@ namespace Recurly
         /// Terminates the subscription immediately.
         /// </summary>
         /// <param name="refund"></param>
-        public void Terminate(RefundType refund)
+        public async Task TerminateAsync(RefundType refund)
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 UrlPrefix + Uri.EscapeUriString(Uuid) + "/terminate?refund=" + refund.ToString().EnumNameToTransportCase(),
                 ReadXml);
         }
@@ -398,14 +398,14 @@ namespace Recurly
         /// Transforms this object into a preview Subscription applied to the account.
         /// </summary>
         /// <param name="timeframe">ChangeTimeframe.Now (default) or at Renewal</param>
-        public void Preview(ChangeTimeframe timeframe)
+        public async Task PreviewAsync(ChangeTimeframe timeframe)
         {
             if (_saved)
             {
                 throw new Recurly.RecurlyException("Cannot preview an existing subscription.");
             }
 
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 UrlPrefix + "preview",
                 WriteSubscriptionXml,
                 ReadXml);
@@ -414,16 +414,16 @@ namespace Recurly
             _saved = false;
         }
 
-        public void Preview()
+        public async Task PreviewAsync()
         {
-            Preview(ChangeTimeframe.Now);
+            await PreviewAsync(ChangeTimeframe.Now);
         }
 
         /// <summary>
         /// Preview the changes associated with the current subscription
         /// </summary>
         /// <param name="timeframe">ChangeTimeframe.Now (default) or at Renewal</param>
-        public virtual Subscription PreviewChange(ChangeTimeframe timeframe)
+        public virtual async Task<Subscription> PreviewChangeAsync(ChangeTimeframe timeframe)
         {
             if (!_saved)
             {
@@ -439,7 +439,7 @@ namespace Recurly
 
             var previewSubscription = new Subscription();
 
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 UrlPrefix + Uri.EscapeUriString(Uuid) + "/preview",
                 writeXmlDelegate,
                 previewSubscription.ReadPreviewXml);
@@ -447,9 +447,9 @@ namespace Recurly
             return statusCode == HttpStatusCode.NotFound ? null : previewSubscription;
         }
 
-        public virtual Subscription PreviewChange()
+        public virtual async Task<Subscription> PreviewChangeAsync()
         {
-            return PreviewChange(ChangeTimeframe.Now);
+            return await PreviewChangeAsync(ChangeTimeframe.Now);
         }
 
 
@@ -458,9 +458,9 @@ namespace Recurly
         /// </summary>
         /// <param name="nextRenewalDate">The specified time the subscription will be postponed</param>
         /// <param name="bulk">bulk = false (default) or true to bypass the 60 second wait while postponing</param>
-        public void Postpone(DateTime nextRenewalDate, bool bulk = false)
+        public async Task PostponeAsync(DateTime nextRenewalDate, bool bulk = false)
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 UrlPrefix + Uri.EscapeUriString(Uuid) + "/postpone?next_renewal_date=" + nextRenewalDate.ToString("yyyy-MM-ddThh:mm:ssZ") + "&bulk=" + bulk.ToString().ToLower(),
                 ReadXml);
         }
@@ -479,10 +479,10 @@ namespace Recurly
             return true;
         }
 
-        public RecurlyList<CouponRedemption> GetRedemptions()
+        public async Task<RecurlyList<CouponRedemption>> GetRedemptionsAsync()
         {
             var coupons = new CouponRedemptionList();
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Get,
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Get,
                 UrlPrefix + Uri.EscapeUriString(Uuid) + "/redemptions/",
                 coupons.ReadXmlList);
 
@@ -889,10 +889,10 @@ namespace Recurly
             return new SubscriptionList(Subscription.UrlPrefix + "?state=" + state.ToString().EnumNameToTransportCase());
         }
 
-        public static Subscription Get(string uuid)
+        public static async Task<Subscription> GetAsync(string uuid)
         {
             var s = new Subscription();
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Get,
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Get,
                 Subscription.UrlPrefix + Uri.EscapeUriString(uuid),
                 s.ReadXml);
 
