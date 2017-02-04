@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace Recurly
@@ -109,9 +110,9 @@ namespace Recurly
         /// <summary>
         /// Delete an account's billing info.
         /// </summary>
-        public void DeleteBillingInfo()
+        public async Task DeleteBillingInfoAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Delete,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Delete,
                 UrlPrefix + Uri.EscapeUriString(AccountCode) + "/billing_info");
             _billingInfo = null;
         }
@@ -119,19 +120,19 @@ namespace Recurly
         /// <summary>
         /// Create a new account in Recurly
         /// </summary>
-        public void Create()
+        public async Task CreateAsync()
         {
             // POST /accounts
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Post, UrlPrefix, WriteXml, ReadXml);
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post, UrlPrefix, WriteXml, ReadXml);
         }
 
         /// <summary>
         /// Update an existing account in Recurly
         /// </summary>
-        public void Update()
+        public async Task UpdateAsync()
         {
             // PUT /accounts/<account code>
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 UrlPrefix + Uri.EscapeUriString(AccountCode),
                 WriteXml);
         }
@@ -140,10 +141,10 @@ namespace Recurly
         /// Close the account and cancel any active subscriptions (if there is one).
         /// Note: This does not create a refund for any time remaining.
         /// </summary>
-        public void Close()
+        public async Task CloseAsync()
         {
-            Accounts.Close(AccountCode);
-            if(State.Is(AccountState.Active))
+            await Accounts.CloseAsync(AccountCode);
+            if (State.Is(AccountState.Active))
                 State ^= AccountState.Active;
             State |= AccountState.Closed;
         }
@@ -151,10 +152,10 @@ namespace Recurly
         /// <summary>
         /// Reopen an existing account in Recurly
         /// </summary>
-        public void Reopen()
+        public async Task ReopenAsync()
         {
-            Accounts.Reopen(AccountCode);
-            if(State.Is(AccountState.Closed))
+            await Accounts.ReopenAsync(AccountCode);
+            if (State.Is(AccountState.Closed))
                 State ^= AccountState.Closed;
             State |= AccountState.Active;
         }
@@ -191,11 +192,11 @@ namespace Recurly
         /// <param name="type">Adjustment type to retrieve. Optional, default: All.</param>
         /// <param name="state">State of the Adjustments to retrieve. Optional, default: Any.</param>
         /// <returns></returns>
-        public RecurlyList<Adjustment> GetAdjustments(Adjustment.AdjustmentType type = Adjustment.AdjustmentType.All,
+        public async Task<RecurlyList<Adjustment>> GetAdjustmentsAsync(Adjustment.AdjustmentType type = Adjustment.AdjustmentType.All,
             Adjustment.AdjustmentState state = Adjustment.AdjustmentState.Any)
         {
             var adjustments = new AdjustmentList();
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Get,
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Get,
                 UrlPrefix + Uri.EscapeUriString(AccountCode) + "/adjustments/"
                 + Build.QueryStringWith(Adjustment.AdjustmentState.Any == state ? "" : "state=" + state.ToString().EnumNameToTransportCase())
                 .AndWith(Adjustment.AdjustmentType.All == type ? "" : "type=" + type.ToString().EnumNameToTransportCase())
@@ -208,10 +209,10 @@ namespace Recurly
         /// Gets all shipping addresses
         /// </summary>
         /// <returns></returns>
-        public RecurlyList<ShippingAddress> GetShippingAddresses()
+        public async Task<RecurlyList<ShippingAddress>> GetShippingAddressesAsync()
         {
             var shippingAddresses = new ShippingAddressList(this);
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Get,
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Get,
                 UrlPrefix + Uri.EscapeUriString(AccountCode) + "/shipping_addresses/",
                 shippingAddresses.ReadXmlList);
 
@@ -288,11 +289,11 @@ namespace Recurly
         /// Returns all active coupon redemptions on this account
         /// </summary>
         /// <returns></returns>
-        public RecurlyList<CouponRedemption> GetActiveRedemptions()
+        public async Task<RecurlyList<CouponRedemption>> GetActiveRedemptionsAsync()
         {
             var redemptions = new CouponRedemptionList();
 
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Get,
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Get,
                 UrlPrefix + Uri.EscapeUriString(AccountCode) + "/redemptions",
                 redemptions.ReadXmlList);
 
@@ -303,9 +304,9 @@ namespace Recurly
         /// Returns the first active coupon redemptions on this account
         /// </summary>
         /// <returns></returns>
-        public CouponRedemption GetActiveRedemption()
+        public async Task<CouponRedemption> GetActiveRedemptionAsync()
         {
-            var activeRedemptions = GetActiveRedemptions();
+            var activeRedemptions = await GetActiveRedemptionsAsync();
 
             if (activeRedemptions == null || activeRedemptions.Count <= 0)
             {
@@ -469,6 +470,22 @@ namespace Recurly
         /// </summary>
         /// <param name="accountCode"></param>
         /// <returns></returns>
+        public static async Task<Account> GetAsync(string accountCode)
+        {
+            var account = new Account();
+            // GET /accounts/<account code>
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Get,
+                UrlPrefix + Uri.EscapeUriString(accountCode),
+                account.ReadXml);
+
+            return statusCode == HttpStatusCode.NotFound ? null : account;
+        }
+
+        /// <summary>
+        /// Lookup a Recurly account
+        /// </summary>
+        /// <param name="accountCode"></param>
+        /// <returns></returns>
         public static Account Get(string accountCode)
         {
             var account = new Account();
@@ -485,10 +502,10 @@ namespace Recurly
         /// Note: This does not create a refund for any time remaining.
         /// </summary>
         /// <param name="accountCode">Account Code</param>
-        public static void Close(string accountCode)
+        public static async Task CloseAsync(string accountCode)
         {
             // DELETE /accounts/<account code>
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Delete,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Delete,
                 Account.UrlPrefix + Uri.EscapeUriString(accountCode));
         }
 
@@ -496,10 +513,10 @@ namespace Recurly
         /// Reopen an existing account in recurly.
         /// </summary>
         /// <param name="accountCode">Account Code</param>
-        public static void Reopen(string accountCode)
+        public static async Task ReopenAsync(string accountCode)
         {
             // PUT /accounts/<account code>/reopen
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 Account.UrlPrefix + Uri.EscapeUriString(accountCode) + "/reopen");
         }
 

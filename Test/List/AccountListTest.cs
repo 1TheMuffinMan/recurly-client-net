@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Threading.Tasks;
+using FluentAssertions;
 using Recurly.Configuration;
 using Xunit;
 using AccountState = Recurly.Account.AccountState;
@@ -17,27 +18,27 @@ namespace Recurly.Test
         [RecurlyFact(TestEnvironment.Type.Integration)]
         public void ListActive()
         {
-            CreateNewAccount();
-            CreateNewAccount();
+            CreateNewAccountAsync();
+            CreateNewAccountAsync();
 
             var accounts = Accounts.List(AccountState.Active);
             accounts.Should().HaveCount(x => x >= 2);
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void ListClosed()
+        public async Task ListClosed()
         {
-            CreateNewAccount().Close();
-            CreateNewAccount().Close();
+            (await CreateNewAccountAsync()).CloseAsync();
+            (await CreateNewAccountAsync()).CloseAsync();
 
             var accounts = Accounts.List(AccountState.Closed);
             accounts.Should().HaveCount(x => x >= 2);
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void ListPastDue()
+        public async Task ListPastDue()
         {
-            var acct = CreateNewAccount();
+            var acct = await CreateNewAccountAsync();
 
             var adjustment = acct.NewAdjustment("USD", 5000, "Past Due", 1);
             adjustment.Create();

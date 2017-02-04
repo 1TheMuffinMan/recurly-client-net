@@ -7,9 +7,9 @@ namespace Recurly.Test
     public class InvoiceTest : BaseTest
     {
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void GetInvoice()
+        public async Task GetInvoice()
         {
-            var account = CreateNewAccountWithBillingInfo();
+            var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 5000, "Test Charge");
             adjustment.Create();
@@ -26,7 +26,7 @@ namespace Recurly.Test
         [RecurlyFact(TestEnvironment.Type.Integration)]
         public async Task GetInvoicePdf()
         {
-            var account = CreateNewAccount();
+            var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 5000, "Test Charge");
             adjustment.Create();
@@ -39,9 +39,9 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void AdjustmentAggregationInAnInvoice()
+        public async Task AdjustmentAggregationInAnInvoice()
         {
-            var account = CreateNewAccount();
+            var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 5000, "Test Charge");
             adjustment.Create();
@@ -59,9 +59,9 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void MarkSuccessful()
+        public async Task MarkSuccessful()
         {
-            var account = CreateNewAccount();
+            var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 3999, "Test Charge");
             adjustment.Create();
@@ -76,9 +76,9 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void FailedCollection()
+        public async Task FailedCollection()
         {
-            var account = CreateNewAccountWithBillingInfo();
+            var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 3999, "Test Charge");
             adjustment.Create();
@@ -90,9 +90,9 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void RefundSingle()
+        public async Task RefundSingle()
         {
-            var account = CreateNewAccountWithBillingInfo();
+            var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 3999, "Test Charge");
             adjustment.Create();
@@ -107,20 +107,20 @@ namespace Recurly.Test
             Assert.Equal(1, invoice.Adjustments.Capacity);
 
             // refund
-            var refundInvoice = invoice.Refund(adjustment, false);
+            var refundInvoice = await invoice.RefundAsync(adjustment, false);
             Assert.NotEqual(invoice.Uuid, refundInvoice.Uuid);
             Assert.Equal(-3999, refundInvoice.SubtotalInCents);
             Assert.Equal(1, refundInvoice.Adjustments.Count);
             Assert.Equal(-1, refundInvoice.Adjustments[0].Quantity);
             Assert.Equal(0, refundInvoice.Transactions.Count);
 
-            account.Close();
+            await account.CloseAsync();
         }
 
         [Fact(Skip = "This feature is deprecated and no longer supported for accounts where line item refunds are turned on.")]
-        public void RefundMultiple()
+        public async Task RefundMultiple()
         {
-            var account = CreateNewAccountWithBillingInfo();
+            var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment1 = account.NewAdjustment("USD", 1, "Test Charge 1");
             adjustment1.Create();
@@ -138,7 +138,7 @@ namespace Recurly.Test
             Assert.Equal(7, invoice.Transactions[0].AmountInCents);
 
             // refund
-            var refundInvoice = invoice.Refund(invoice.Adjustments);
+            var refundInvoice = await invoice.RefundAsync(invoice.Adjustments);
             Assert.NotEqual(invoice.Uuid, refundInvoice.Uuid);
             Assert.Equal(-5, refundInvoice.SubtotalInCents);
             Assert.Equal(2, refundInvoice.Adjustments.Count);
@@ -147,14 +147,14 @@ namespace Recurly.Test
             Assert.Equal(1, refundInvoice.Transactions.Count);
             Assert.Equal(5, refundInvoice.Transactions[0].AmountInCents);
 
-            account.Close();
+            await account.CloseAsync();
         }
 
 
         [Fact(Skip = "This feature is deprecated and no longer supported for accounts where line item refunds are turned on.")]
-        public void RefundOpenAmount()
+        public async Task RefundOpenAmount()
         {
-            var account = CreateNewAccountWithBillingInfo();
+            var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 3999, "Test Charge");
             adjustment.Create();
@@ -173,7 +173,7 @@ namespace Recurly.Test
             Assert.NotEqual(invoice.Uuid, refundInvoice.Uuid);
             Assert.Equal(-91, refundInvoice.SubtotalInCents);  // 91 cents
 
-            account.Close();
+            await account.CloseAsync();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 using Xunit.Extensions;
@@ -9,9 +10,9 @@ namespace Recurly.Test
     public class BillingInfoTest : BaseTest
     {
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void UpdateBillingInfo()
+        public async Task UpdateBillingInfo()
         {
-            var account = CreateNewAccount();
+            var account = await CreateNewAccountAsync();
 
             var info = NewBillingInfo(account);
             info.FirstName = "Jane";
@@ -20,7 +21,7 @@ namespace Recurly.Test
             info.ExpirationYear = DateTime.Now.AddYears(3).Year;
             info.Update();
 
-            var get = Accounts.Get(account.AccountCode);
+            var get = await Accounts.GetAsync(account.AccountCode);
 
             get.BillingInfo.FirstName.Should().Be("Jane");
             get.BillingInfo.LastName.Should().Be("Smith");
@@ -29,9 +30,9 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void UpdateBillingInfoWithToken()
+        public async Task UpdateBillingInfoWithToken()
         {
-            var account = CreateNewAccount();
+            var account = await CreateNewAccountAsync();
             var billingInfo = new BillingInfo(account)
             {
                 TokenId = "abc123"
@@ -52,14 +53,14 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void LookupBillingInfo()
+        public async Task LookupBillingInfo()
         {
             var accountCode = GetUniqueAccountCode();
             var info = NewBillingInfo(accountCode);
             var account = new Account(accountCode, info);
-            account.Create();
+            await account.CreateAsync();
 
-            var get = Accounts.Get(accountCode);
+            var get = await Accounts.GetAsync(accountCode);
 
             get.BillingInfo.FirstName.Should().Be(info.FirstName);
             get.BillingInfo.LastName.Should().Be(info.LastName);
@@ -68,24 +69,24 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void LookupMissingInfo()
+        public async Task LookupMissingInfo()
         {
-            var newAcct = CreateNewAccount();
+            var newAcct = await CreateNewAccountAsync();
 
             Action getInfo = () => BillingInfo.Get(newAcct.AccountCode);
             getInfo.ShouldThrow<NotFoundException>();
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void DeleteBillingInfo()
+        public async Task DeleteBillingInfo()
         {
-            var account = CreateNewAccountWithBillingInfo();
+            var account = await CreateNewAccountWithBillingInfoAsync();
 
-            account.DeleteBillingInfo();
+            await account.DeleteBillingInfoAsync();
 
             account.BillingInfo.Should().BeNull();
 
-            var fromNetwork = Accounts.Get(account.AccountCode);
+            var fromNetwork = await Accounts.GetAsync(account.AccountCode);
             fromNetwork.BillingInfo.Should().BeNull();
         }
 

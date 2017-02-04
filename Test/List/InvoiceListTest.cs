@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 
@@ -7,11 +8,11 @@ namespace Recurly.Test
     public class InvoiceListTest : BaseTest
     {
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void GetInvoices()
+        public async Task GetInvoices()
         {
             for (var x = 0; x < 6; x++)
             {
-                var acct = CreateNewAccount();
+                var acct = await CreateNewAccountAsync();
 
                 var adjustment = acct.NewAdjustment("USD", 500 + x, "Test Charge");
                 adjustment.Create();
@@ -37,11 +38,11 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void GetOpenInvoices()
+        public async Task GetOpenInvoices()
         {
             for (var x = 0; x < 2; x++)
             {
-                var account = CreateNewAccount();
+                var account = await CreateNewAccountAsync();
                 var adjustment = account.NewAdjustment("USD", 500 + x, "Test Charge");
                 adjustment.Create();
                 account.InvoicePendingCharges();
@@ -52,11 +53,11 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void GetCollectedInvoices()
+        public async Task GetCollectedInvoices()
         {
             for (var x = 0; x < 2; x++)
             {
-                var acct = CreateNewAccount();
+                var acct = await CreateNewAccountAsync();
                 var adjustment = acct.NewAdjustment("USD", 500 + x, "Test Charge");
                 adjustment.Create();
                 var invoice = acct.InvoicePendingCharges();
@@ -68,11 +69,11 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void GetFailedInvoices()
+        public async Task GetFailedInvoices()
         {
             for (var x = 0; x < 2; x++)
             {
-                var acct = CreateNewAccount();
+                var acct = await CreateNewAccountAsync();
                 var adjustment = acct.NewAdjustment("USD", 500 + x, "Test Charge");
                 adjustment.Create();
                 var invoice = acct.InvoicePendingCharges();
@@ -84,11 +85,11 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void GetPastDueInvoices()
+        public async Task GetPastDueInvoices()
         {
             for (var x = 0; x < 2; x++)
             {
-                var acct = CreateNewAccount();
+                var acct = await CreateNewAccountAsync();
                 var adjustment = acct.NewAdjustment("USD", 500 + x, "Test charge");
                 adjustment.Create();
                 acct.InvoicePendingCharges();
@@ -99,9 +100,9 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void GetProcessingInvoices()
+        public async Task GetProcessingInvoices()
         {
-            var account = CreateNewAccountWithACHBillingInfo();
+            var account = await CreateNewAccountWithACHBillingInfo();
             var adjustment = account.NewAdjustment("USD", 510, "ACH invoice test");
             adjustment.Create();
             account.InvoicePendingCharges();
@@ -117,9 +118,9 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void GetInvoicesForAccount()
+        public async Task GetInvoicesForAccount()
         {
-            var account = CreateNewAccountWithBillingInfo();
+            var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 450, "Test Charge #1");
             adjustment.Create();

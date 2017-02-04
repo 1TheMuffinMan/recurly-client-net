@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 
@@ -8,11 +9,11 @@ namespace Recurly.Test
     public class TransactionListTest : BaseTest
     {
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void ListAllTransactions()
+        public async Task ListAllTransactions()
         {
             for (var x = 0; x < 5; x++)
             {
-                var account = CreateNewAccountWithBillingInfo();
+                var account = await CreateNewAccountWithBillingInfoAsync();
                 var transaction = new Transaction(account.AccountCode, 3000 + x, "USD");
                 transaction.Create();
             }
@@ -22,11 +23,11 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void ListSuccessfulTransactions()
+        public async Task ListSuccessfulTransactions()
         {
             for (var x = 0; x < 2; x++)
             {
-                var account = CreateNewAccountWithBillingInfo();
+                var account = await CreateNewAccountWithBillingInfoAsync();
                 var transaction = new Transaction(account.AccountCode, 3000 + x, "USD");
                 transaction.Create();
             }
@@ -36,11 +37,11 @@ namespace Recurly.Test
         }
 
         [Fact(Skip = "This feature is deprecated and no longer supported for accounts where line item refunds are turned on.")]
-        public void ListVoidedTransactions()
+        public async Task ListVoidedTransactions()
         {
             for (var x = 0; x < 2; x++)
             {
-                var account = CreateNewAccountWithBillingInfo();
+                var account = await CreateNewAccountWithBillingInfoAsync();
                 var transaction = new Transaction(account.AccountCode, 3000 + x, "USD");
                 transaction.Create();
 
@@ -54,11 +55,11 @@ namespace Recurly.Test
         }
 
         [Fact(Skip = "This feature is deprecated and no longer supported for accounts where line item refunds are turned on.")]
-        public void ListRefundedTransactions()
+        public async Task ListRefundedTransactions()
         {
             for (var x = 0; x < 2; x++)
             {
-                var account = CreateNewAccountWithBillingInfo();
+                var account = await CreateNewAccountWithBillingInfoAsync();
                 var transaction = new Transaction(account.AccountCode, 3000 + x, "USD");
                 transaction.Create();
                 transaction.Refund(1500);
@@ -69,9 +70,9 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void ListTransactionsForAccount()
+        public async Task ListTransactionsForAccount()
         {
-            var account = CreateNewAccountWithBillingInfo();
+            var account = await CreateNewAccountWithBillingInfoAsync();
 
             var transaction1 = new Transaction(account.AccountCode, 3000, "USD");
             transaction1.Create();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 
@@ -9,12 +10,12 @@ namespace Recurly.Test
     public class CouponRedemptionTest : BaseTest
     {
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void RedeemCoupon()
+        public async Task RedeemCoupon()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), 10);
             coupon.Create();
 
-            var account = CreateNewAccount();
+            var account = await CreateNewAccountAsync();
             account.CreatedAt.Should().NotBe(default(DateTime));
 
             var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
@@ -26,18 +27,18 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void LookupRedemption()
+        public async Task LookupRedemption()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), 10);
             coupon.Create();
 
-            var account = CreateNewAccount();
+            var account = await CreateNewAccountAsync();
             account.CreatedAt.Should().NotBe(default(DateTime));
 
             var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
             redemption.Should().NotBeNull();
 
-            redemption = account.GetActiveRedemption();
+            redemption = await account.GetActiveRedemptionAsync();
             redemption.CouponCode.Should().Be(coupon.CouponCode);
             redemption.AccountCode.Should().Be(account.AccountCode);
             redemption.CreatedAt.Should().NotBe(default(DateTime));
@@ -45,12 +46,12 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void RemoveCoupon()
+        public async Task RemoveCoupon()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), 10);
             coupon.Create();
 
-            var account = CreateNewAccount();
+            var account = await CreateNewAccountAsync();
             account.CreatedAt.Should().NotBe(default(DateTime));
 
             var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
@@ -58,12 +59,12 @@ namespace Recurly.Test
 
             redemption.Delete();
 
-            var activeRedemption = account.GetActiveRedemption();
+            var activeRedemption = account.GetActiveRedemptionAsync();
             activeRedemption.Should().Be(null);
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void LookupCouponInvoice()
+        public async Task LookupCouponInvoice()
         {
             var discounts = new Dictionary<string, int> { { "USD", 1000 } };
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName(), discounts);
@@ -77,12 +78,12 @@ namespace Recurly.Test
             plan.Create();
             PlansToDeactivateOnDispose.Add(plan);
 
-            var account = CreateNewAccountWithBillingInfo();
+            var account = await CreateNewAccountWithBillingInfoAsync();
 
             var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
 
             var sub = new Subscription(account, plan, "USD", coupon.CouponCode);
-            sub.Create();
+            await sub.CreateAsync();
 
             // TODO complete this test
 

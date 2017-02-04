@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Recurly.Test
 {
@@ -16,26 +17,26 @@ namespace Recurly.Test
             PlansToDeactivateOnDispose = new List<Plan>();
         }
 
-        protected Account CreateNewAccount()
+        protected async Task<Account> CreateNewAccountAsync()
         {
             var account = new Account(GetUniqueAccountCode());
-            account.Create();
+            await account.CreateAsync();
             return account;
         }
 
-        protected Account CreateNewAccountWithBillingInfo()
+        protected async Task<Account> CreateNewAccountWithBillingInfoAsync()
         {
             var account = NewAccountWithBillingInfo();
-            account.Create();
+            await account.CreateAsync();
 
             return account;
         }
 
-        protected Account CreateNewAccountWithACHBillingInfo()
+        protected async Task<Account> CreateNewAccountWithACHBillingInfo()
         {
             var code = GetUniqueAccountCode();
             var account = new Account(code, NewACHBillingInfo(code));
-            account.Create();
+            await account.CreateAsync();
             return account;
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 
@@ -7,9 +8,9 @@ namespace Recurly.Test
     public class TransactionTest : BaseTest
     {
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void LookupTransaction()
+        public async Task LookupTransaction()
         {
-            var acct = CreateNewAccountWithBillingInfo();
+            var acct = await CreateNewAccountWithBillingInfoAsync();
             var transaction = new Transaction(acct, 5000, "USD");
             transaction.Create();
 
@@ -38,9 +39,9 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void CreateTransactionExistingAccount()
+        public async Task CreateTransactionExistingAccount()
         {
-            var acct = CreateNewAccountWithBillingInfo();
+            var acct = await CreateNewAccountWithBillingInfoAsync();
             var transaction = new Transaction(acct.AccountCode, 3000, "USD");
 
             transaction.Create();
@@ -56,7 +57,7 @@ namespace Recurly.Test
                 FirstName = "John",
                 LastName = "Smith"
             };
-            account.Create();
+            account.CreateAsync();
             account.BillingInfo = NewBillingInfo(account);
             var transaction = new Transaction(account, 5000, "USD");
 

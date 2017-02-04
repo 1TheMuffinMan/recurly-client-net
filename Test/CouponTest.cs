@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 
@@ -49,7 +50,7 @@ namespace Recurly.Test
         /// out coupons as "Inactive" rather than "MaxedOut" or "Expired".
         /// </summary>
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void ListCouponsExpired()
+        public async Task ListCouponsExpired()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName("Expired test"), 10)
             {
@@ -58,7 +59,7 @@ namespace Recurly.Test
             coupon.Create();
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
-            var account = CreateNewAccountWithBillingInfo();
+            var account = await CreateNewAccountWithBillingInfoAsync();
 
             var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
             redemption.CreatedAt.Should().NotBe(default(DateTime));
@@ -76,7 +77,7 @@ namespace Recurly.Test
         /// out coupons as "Inactive" rather than "MaxedOut" or "Expired".
         /// </summary>
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void ListCouponsMaxedOut()
+        public async Task ListCouponsMaxedOut()
         {
             var coupon = new Coupon(GetMockCouponCode(), GetMockCouponName("Maxed Out test"), 10)
             {
@@ -85,7 +86,7 @@ namespace Recurly.Test
             coupon.Create();
             coupon.CreatedAt.Should().NotBe(default(DateTime));
 
-            var account = CreateNewAccountWithBillingInfo();
+            var account = await CreateNewAccountWithBillingInfoAsync();
 
             var redemption = account.RedeemCoupon(coupon.CouponCode, "USD");
             redemption.CreatedAt.Should().NotBe(default(DateTime));

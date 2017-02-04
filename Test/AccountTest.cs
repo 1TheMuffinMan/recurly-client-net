@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 
@@ -7,16 +8,16 @@ namespace Recurly.Test
     public class AccountTest : BaseTest
     {
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void CreateAccount()
+        public async Task CreateAccount()
         {
             var acct = new Account(GetUniqueAccountCode());
-            acct.Create();
+            await acct.CreateAsync();
             acct.CreatedAt.Should().NotBe(default(DateTime));
             Assert.False(acct.TaxExempt.Value);
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void CreateAccountWithParameters()
+        public async Task CreateAccountWithParameters()
         {
             var acct = new Account(GetUniqueAccountCode())
             {
@@ -36,7 +37,7 @@ namespace Recurly.Test
             string address = "123 Faux Street";
             acct.Address.Address1 = address;
 
-            acct.Create();
+            await acct.CreateAsync();
 
             acct.Username.Should().Be("testuser1");
             acct.Email.Should().Be("testemail@test.com");
@@ -60,26 +61,24 @@ namespace Recurly.Test
         }
 
         [Fact]
-        public void CreateAccountWithBillingInfo()
+        public async Task CreateAccountWithBillingInfo()
         {
             var accountCode = GetUniqueAccountCode();
             var account = new Account(accountCode, NewBillingInfo(accountCode));
 
-            Action create = account.Create;
-
-            create.ShouldNotThrow<ValidationException>();
+            await account.CreateAsync();
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void LookupAccount()
+        public async Task LookupAccount()
         {
             var newAcct = new Account(GetUniqueAccountCode())
             {
                 Email = "testemail@recurly.com"
             };
-            newAcct.Create();
+            await newAcct.CreateAsync();
 
-            var account = Accounts.Get(newAcct.AccountCode);
+            var account = await Accounts.GetAsync(newAcct.AccountCode);
 
             account.Should().NotBeNull();
             account.AccountCode.Should().Be(newAcct.AccountCode);
@@ -89,58 +88,58 @@ namespace Recurly.Test
         [RecurlyFact(TestEnvironment.Type.Integration)]
         public void FindNonExistentAccount()
         {
-            Action get = () => Accounts.Get("totallynotfound!@#$");
+            Action get = () => Accounts.GetAsync("totallynotfound!@#$");
             get.ShouldThrow<NotFoundException>();
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void UpdateAccount()
+        public async Task UpdateAccount()
         {
             var acct = new Account(GetUniqueAccountCode());
-            acct.Create();
+            await acct.CreateAsync();
 
             acct.LastName = "UpdateTest123";
             acct.TaxExempt = true;
             acct.VatNumber = "woot";
-            acct.Update();
+            await acct.UpdateAsync();
 
-            var getAcct = Accounts.Get(acct.AccountCode);
+            var getAcct = await Accounts.GetAsync(acct.AccountCode);
             acct.LastName.Should().Be(getAcct.LastName);
             Assert.True(acct.TaxExempt.Value);
             Assert.Equal("woot", acct.VatNumber);
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void CloseAccount()
+        public async Task CloseAccount()
         {
             var accountCode = GetUniqueAccountCode();
             var acct = new Account(accountCode);
-            acct.Create();
+            await acct.CreateAsync();
 
-            acct.Close();
+            await acct.CloseAsync();
 
-            var getAcct = Accounts.Get(accountCode);
+            var getAcct = await Accounts.GetAsync(accountCode);
             getAcct.State.Should().Be(Account.AccountState.Closed);
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void ReopenAccount()
+        public async Task ReopenAccount()
         {
             var accountCode = GetUniqueAccountCode();
             var acct = new Account(accountCode);
-            acct.Create();
-            acct.Close();
+            await acct.CreateAsync();
+            await acct.CloseAsync();
 
-            acct.Reopen();
+            await acct.ReopenAsync();
 
-            var test = Accounts.Get(accountCode);
+            var test = await Accounts.GetAsync(accountCode);
             acct.State.Should().Be(test.State).And.Be(Account.AccountState.Active);
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void GetAccountNotes()
+        public async Task GetAccountNotes()
         {
-            var account = CreateNewAccount();
+            var account = await CreateNewAccountAsync();
 
             var notes = account.GetNotes();
 
