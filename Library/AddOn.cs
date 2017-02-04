@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace Recurly
@@ -60,9 +61,9 @@ namespace Recurly
         /// <summary>
         /// Creates an addon
         /// </summary>
-        public void Create()
+        public async Task CreateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 UrlPrefix + Uri.EscapeUriString(PlanCode) + UrlPostfix,
                 WriteXml,
                 ReadXml);
@@ -71,9 +72,9 @@ namespace Recurly
         /// <summary>
         /// Update an existing add on in Recurly
         /// </summary>
-        public void Update()
+        public async Task UpdateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 UrlPrefix + Uri.EscapeUriString(PlanCode) + UrlPostfix + Uri.EscapeUriString(AddOnCode),
                 WriteXml,
                 ReadXml);
@@ -82,9 +83,9 @@ namespace Recurly
         /// <summary>
         /// Deletes this add on, making it inactive
         /// </summary>
-        public void Delete()
+        public async Task DeleteAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Delete,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Delete,
                 UrlPrefix + Uri.EscapeUriString(PlanCode) + UrlPostfix + Uri.EscapeUriString(AddOnCode));
         }
 
