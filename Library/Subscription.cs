@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace Recurly
@@ -329,9 +330,9 @@ namespace Recurly
         /// <summary>
         /// Creates a new subscription on Recurly
         /// </summary>
-        public void Create()
+        public async Task CreateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 UrlPrefix,
                 WriteSubscriptionXml,
                 ReadXml);
@@ -464,9 +465,9 @@ namespace Recurly
                 ReadXml);
         }
 
-        public bool UpdateNotes(Dictionary<string, string> notes)
+        public async Task<bool> UpdateNotesAsync(Dictionary<string, string> notes)
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 UrlPrefix + Uri.EscapeUriString(Uuid) + "/notes",
                 WriteSubscriptionNotesXml(notes),
                 ReadXml);

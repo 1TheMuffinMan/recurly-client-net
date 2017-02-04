@@ -25,11 +25,11 @@ namespace Recurly.Test
                 }
                 else if (x == 3 || x == 4)
                 {
-                    invoice.MarkFailed();
+                    invoice.MarkFailedAsync();
                 }
                 else
                 {
-                    invoice.MarkSuccessful();
+                    invoice.MarkSuccessfulAsync();
                 }
             }
 
@@ -61,7 +61,7 @@ namespace Recurly.Test
                 var adjustment = acct.NewAdjustment("USD", 500 + x, "Test Charge");
                 adjustment.Create();
                 var invoice = acct.InvoicePendingCharges();
-                invoice.MarkSuccessful();
+                invoice.MarkSuccessfulAsync();
             }
 
             var list = Invoices.List(Invoice.InvoiceState.Collected);
@@ -77,7 +77,7 @@ namespace Recurly.Test
                 var adjustment = acct.NewAdjustment("USD", 500 + x, "Test Charge");
                 adjustment.Create();
                 var invoice = acct.InvoicePendingCharges();
-                invoice.MarkFailed();
+                invoice.MarkFailedAsync();
             }
 
             var list = Invoices.List(Invoice.InvoiceState.Failed);
@@ -126,13 +126,13 @@ namespace Recurly.Test
             adjustment.Create();
 
             var invoice = account.InvoicePendingCharges();
-            invoice.MarkSuccessful();
+            invoice.MarkSuccessfulAsync();
 
             adjustment = account.NewAdjustment("USD", 350, "Test Charge #2");
             adjustment.Create();
 
             invoice = account.InvoicePendingCharges();
-            invoice.MarkFailed();
+            invoice.MarkFailedAsync();
 
             var list = Invoices.List(account.AccountCode);
             Assert.Equal(2, list.Count);

@@ -91,8 +91,8 @@ namespace Recurly.Test
 
             invoices.Should().NotBeEmpty();
 
-            var invoice = Invoices.Get(invoices.First().InvoiceNumber);
-            var fromInvoice = invoice.GetRedemption();
+            var invoice = await Invoices.GetAsync(invoices.First().InvoiceNumber);
+            var fromInvoice = invoice.GetRedemptionAsync();
 
             redemption.Should().Be(fromInvoice);
         }

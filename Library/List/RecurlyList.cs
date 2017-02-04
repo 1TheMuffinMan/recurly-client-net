@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using HttpRequestMethod = Recurly.Client.HttpRequestMethod;
 
@@ -84,9 +85,9 @@ namespace Recurly
             GetItems();
         }
 
-        public void GetItems()
+        public async Task GetItems()
         {
-            Client.Instance.PerformRequest(Method,
+            await Client.Instance.PerformRequestAsync(Method,
                 ApplyPaging(BaseUrl),
                 ReadXmlList);
         }

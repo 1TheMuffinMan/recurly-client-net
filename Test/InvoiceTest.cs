@@ -18,7 +18,7 @@ namespace Recurly.Test
             Assert.Equal("usst", invoice.TaxType);
             Assert.Equal(0.0875M, invoice.TaxRate.Value);
 
-            var fromService = Invoices.Get(invoice.InvoiceNumber);
+            var fromService = await Invoices.GetAsync(invoice.InvoiceNumber);
 
             invoice.Should().Be(fromService);
         }
@@ -68,7 +68,7 @@ namespace Recurly.Test
 
             var invoice = account.InvoicePendingCharges();
 
-            invoice.MarkSuccessful();
+            invoice.MarkSuccessfulAsync();
 
             Assert.Equal(1, invoice.Adjustments.Count);
 
@@ -84,7 +84,7 @@ namespace Recurly.Test
             adjustment.Create();
 
             var invoice = account.InvoicePendingCharges();
-            invoice.MarkFailed();
+            invoice.MarkFailedAsync();
             invoice.State.Should().Be(Invoice.InvoiceState.Failed);
             Assert.NotNull(invoice.ClosedAt);
         }
@@ -99,7 +99,7 @@ namespace Recurly.Test
 
             var invoice = account.InvoicePendingCharges();
 
-            invoice.MarkSuccessful();
+            invoice.MarkSuccessfulAsync();
 
             invoice.State.Should().Be(Invoice.InvoiceState.Collected);
 
@@ -129,7 +129,7 @@ namespace Recurly.Test
             adjustment2.Create();
 
             var invoice = account.InvoicePendingCharges();
-            invoice.MarkSuccessful();
+            invoice.MarkSuccessfulAsync();
 
             System.Threading.Thread.Sleep(2000); // hack
 
@@ -161,7 +161,7 @@ namespace Recurly.Test
 
             var invoice = account.InvoicePendingCharges();
 
-            invoice.MarkSuccessful();
+            invoice.MarkSuccessfulAsync();
 
             invoice.State.Should().Be(Invoice.InvoiceState.Collected);
 

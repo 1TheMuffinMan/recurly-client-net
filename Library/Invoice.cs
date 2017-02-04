@@ -108,9 +108,9 @@ namespace Recurly
         /// <summary>
         /// Post an invoice on an account using it's pending charges
         /// </summary>
-        public void Create(string accountCode)
+        public async Task CreateAsync(string accountCode)
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 "/accounts/" + Uri.EscapeUriString(accountCode) + Invoice.UrlPrefix,
                 WriteXml,
                 ReadXml);
@@ -119,9 +119,9 @@ namespace Recurly
         /// <summary>
         /// Preview an invoice on an account using it's pending charges
         /// </summary>
-        public void Preview(string accountCode)
+        public async Task PreviewAsync(string accountCode)
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 "/accounts/" + Uri.EscapeUriString(accountCode) + Invoice.UrlPrefix + "preview",
                 WriteXml,
                 ReadXml);
@@ -130,42 +130,42 @@ namespace Recurly
         /// <summary>
         /// Marks an invoice as paid successfully
         /// </summary>
-        public void MarkSuccessful()
+        public async Task MarkSuccessfulAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put, memberUrl() + "/mark_successful", ReadXml);
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put, memberUrl() + "/mark_successful", ReadXml);
         }
 
         /// <summary>
         /// Marks an invoice as failed collection
         /// </summary>
-        public void MarkFailed()
+        public async Task MarkFailedAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put, memberUrl() + "/mark_failed", ReadXml);
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put, memberUrl() + "/mark_failed", ReadXml);
         }
 
         /// <summary>
         /// Returns the active coupon redemption on this invoice
         /// </summary>
         /// <returns></returns>
-        public CouponRedemption GetRedemption()
+        public async Task<CouponRedemption> GetRedemptionAsync()
         {
-            var redemptionList = GetRedemptions();
+            var redemptionList = await GetRedemptionsAsync();
             return redemptionList.HasAny() ? redemptionList[0] : null;
         }
 
-        public RecurlyList<CouponRedemption> GetRedemptions()
+        public async Task<RecurlyList<CouponRedemption>> GetRedemptionsAsync()
         {
             var coupons = new CouponRedemptionList();
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Get,
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Get,
                 memberUrl() + "/redemptions/",
                 coupons.ReadXmlList);
 
             return statusCode == HttpStatusCode.NotFound ? null : coupons;
         }
 
-        public Invoice GetOriginalInvoice()
+        public async Task<Invoice> GetOriginalInvoice()
         {
-            return Invoices.Get(OriginalInvoiceNumberWithPrefix());
+            return await Invoices.GetAsync(OriginalInvoiceNumberWithPrefix());
         }
 
         /// <summary>
@@ -175,20 +175,20 @@ namespace Recurly
         /// <param name="prorate"></param>
         /// <param name="quantity"></param>
         /// <returns>new Invoice object</returns>
-        public Invoice Refund(Adjustment adjustment, bool prorate = false, int quantity = 0, RefundOrderPriority refundPriority = RefundOrderPriority.Credit)
+        public async Task<Invoice> RefundAsync(Adjustment adjustment, bool prorate = false, int quantity = 0, RefundOrderPriority refundPriority = RefundOrderPriority.Credit)
         {
             var adjustments = new List<Adjustment>();
             adjustments.Add(adjustment);
 
-            return Refund(adjustments, prorate, quantity, refundPriority);
+            return await RefundAsync(adjustments, prorate, quantity, refundPriority);
         }
 
-        public Invoice Refund(IEnumerable<Adjustment> adjustments, bool prorate = false, int quantity = 0, RefundOrderPriority refundPriority = RefundOrderPriority.Credit)
+        public async Task<Invoice> RefundAsync(IEnumerable<Adjustment> adjustments, bool prorate = false, int quantity = 0, RefundOrderPriority refundPriority = RefundOrderPriority.Credit)
         {
             var refunds = new RefundList(adjustments, prorate, quantity, refundPriority);
             var invoice = new Invoice();
 
-            var response = Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            var response = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 memberUrl() + "/refund",
                 refunds.WriteXml,
                 invoice.ReadXml);
@@ -438,9 +438,9 @@ namespace Recurly
         /// </summary>
         /// <param name="invoiceNumber">Invoice Number</param>
         /// <returns></returns>
-        public static Invoice Get(int invoiceNumber)
+        public static async Task<Invoice> GetAsync(int invoiceNumber)
         {
-            return Get(Convert.ToString(invoiceNumber));
+            return await GetAsync(Convert.ToString(invoiceNumber));
         }
 
         /// <summary>
@@ -460,21 +460,19 @@ namespace Recurly
         }
 
         /// <summary>
-        /// Create an Invoice if there are outstanding charges on an account. If there are no outstanding
-        /// charges, null is returned.
+        /// Look up an Invoice.
         /// </summary>
-        /// <param name="accountCode">Account code</param>
+        /// <param name="invoiceNumber">Invoice Number</param>
         /// <returns></returns>
-        [Obsolete("Deprecated, please use the Create instance method on the Invoice object")] 
-        public static Invoice Create(string accountCode)
+        public static async Task<Invoice> GetAsync(string invoiceNumberWithPrefix)
         {
             var invoice = new Invoice();
 
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
-                "/accounts/" + Uri.EscapeUriString(accountCode) + Invoice.UrlPrefix,
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Get,
+                Invoice.UrlPrefix + invoiceNumberWithPrefix,
                 invoice.ReadXml);
 
-            return (int)statusCode == ValidationException.HttpStatusCode ? null : invoice;
+            return statusCode == HttpStatusCode.NotFound ? null : invoice;
         }
     }
 }
