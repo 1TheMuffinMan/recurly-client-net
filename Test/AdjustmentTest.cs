@@ -16,7 +16,7 @@ namespace Recurly.Test
             string desc = "Charge";
             var adjustment = account.NewAdjustment("USD", 5000, desc);
 
-            adjustment.Create();
+            await adjustment.CreateAsync();
 
             adjustment.CreatedAt.Should().NotBe(default(DateTime));
             Assert.False(adjustment.TaxExempt);
@@ -41,7 +41,7 @@ namespace Recurly.Test
             adjustment.AccountingCode = accountingCode;
             adjustment.UnitAmountInCents = unitAmountInCents;
 
-            adjustment.Create();
+            await adjustment.CreateAsync();
 
             adjustment.CreatedAt.Should().NotBe(default(DateTime));
             Assert.True(adjustment.TaxExempt);
@@ -58,10 +58,10 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 5000, "Charge", 1);
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             adjustment = account.NewAdjustment("USD", -1492, "Credit", 1);
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             account.InvoicePendingCharges();
 
@@ -79,10 +79,10 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 1234, "Charge", 1);
-            adjustment.Create();
+            await adjustment.CreateAsync();
 
             adjustment = account.NewAdjustment("USD", -5678, "Credit");
-            adjustment.Create();
+            await adjustment.CreateAsync();
 
             account.InvoicePendingCharges();
 
@@ -100,10 +100,10 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 3456, "Charge", 1);
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             adjustment = account.NewAdjustment("USD", -3456, "Charge", 1);
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             var adjustments = await account.GetAdjustmentsAsync(Adjustment.AdjustmentType.Credit);
             adjustments.Should().HaveCount(1);
@@ -116,10 +116,10 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 1234);
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             adjustment = account.NewAdjustment("USD", -5678, "list adjustments", 1);
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             account.InvoicePendingCharges();
 
@@ -134,10 +134,10 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 1234);
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             adjustment = account.NewAdjustment("USD", -5678, "");
-            adjustment.Create();
+            adjustment.CreateAsync();
 
 
             var adjustments = await account.GetAdjustmentsAsync(state: Adjustment.AdjustmentState.Pending);
@@ -156,7 +156,7 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 1234);
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             adjustment.Uuid.Should().NotBeNullOrEmpty();
 
@@ -171,11 +171,11 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 1234);
-            adjustment.Create();
+            await adjustment.CreateAsync();
 
             adjustment.Uuid.Should().NotBeNullOrEmpty();
 
-            adjustment.Delete();
+            await adjustment.DeleteAsync();
 
             Action get = () => Adjustments.Get(adjustment.Uuid);
             get.ShouldThrow<NotFoundException>();

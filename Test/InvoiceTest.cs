@@ -12,7 +12,7 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 5000, "Test Charge");
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
             Assert.Equal("usst", invoice.TaxType);
@@ -29,7 +29,7 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 5000, "Test Charge");
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
 
@@ -44,13 +44,13 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 5000, "Test Charge");
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             adjustment = account.NewAdjustment("USD", 5000, "Test Charge 2");
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             adjustment = account.NewAdjustment("USD", -2500, "Test Credit");
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
 
@@ -64,7 +64,7 @@ namespace Recurly.Test
             var account = await CreateNewAccountAsync();
 
             var adjustment = account.NewAdjustment("USD", 3999, "Test Charge");
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
 
@@ -81,7 +81,7 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 3999, "Test Charge");
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
             invoice.MarkFailedAsync();
@@ -95,7 +95,7 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 3999, "Test Charge");
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
 
@@ -123,10 +123,10 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment1 = account.NewAdjustment("USD", 1, "Test Charge 1");
-            adjustment1.Create();
+            adjustment1.CreateAsync();
 
             var adjustment2 = account.NewAdjustment("USD", 2, "Test Charge 2", 2);
-            adjustment2.Create();
+            adjustment2.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
             invoice.MarkSuccessfulAsync();
@@ -157,7 +157,7 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var adjustment = account.NewAdjustment("USD", 3999, "Test Charge");
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             var invoice = account.InvoicePendingCharges();
 

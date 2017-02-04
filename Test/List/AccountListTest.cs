@@ -41,7 +41,7 @@ namespace Recurly.Test
             var acct = await CreateNewAccountAsync();
 
             var adjustment = acct.NewAdjustment("USD", 5000, "Past Due", 1);
-            adjustment.Create();
+            adjustment.CreateAsync();
 
             acct.InvoicePendingCharges();
 

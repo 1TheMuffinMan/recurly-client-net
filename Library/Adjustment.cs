@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace Recurly
@@ -94,10 +95,10 @@ namespace Recurly
         /// <summary>
         /// Create a new adjustment in Recurly
         /// </summary>
-        public void Create()
+        public async Task CreateAsync()
         {
             // POST /accounts/<account code>/adjustments
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 UrlPrefix + Uri.EscapeUriString(AccountCode) + UrlPostfix,
                 WriteXml,
                 ReadXml);
@@ -108,10 +109,10 @@ namespace Recurly
         /// 
         /// Adjustments can only be deleted when not invoiced
         /// </summary>
-        public void Delete()
+        public async Task DeleteAsync()
         {
             // DELETE /adjustments/<uuid>
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Delete,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Delete,
                 UrlPostfix + Uri.EscapeUriString(Uuid));
         }
 
