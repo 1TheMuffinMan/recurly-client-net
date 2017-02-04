@@ -15,7 +15,7 @@ namespace Recurly.Test
             {
                 var account = await CreateNewAccountWithBillingInfoAsync();
                 var transaction = new Transaction(account.AccountCode, 3000 + x, "USD");
-                transaction.Create();
+                transaction.CreateAsync();
             }
 
             var transactions = Transactions.List();
@@ -29,7 +29,7 @@ namespace Recurly.Test
             {
                 var account = await CreateNewAccountWithBillingInfoAsync();
                 var transaction = new Transaction(account.AccountCode, 3000 + x, "USD");
-                transaction.Create();
+                transaction.CreateAsync();
             }
 
             var transactions = Transactions.List(TransactionList.TransactionState.Successful);
@@ -43,9 +43,9 @@ namespace Recurly.Test
             {
                 var account = await CreateNewAccountWithBillingInfoAsync();
                 var transaction = new Transaction(account.AccountCode, 3000 + x, "USD");
-                transaction.Create();
+                transaction.CreateAsync();
 
-                transaction.Refund();
+                transaction.RefundAsync();
 
 
             }
@@ -61,8 +61,8 @@ namespace Recurly.Test
             {
                 var account = await CreateNewAccountWithBillingInfoAsync();
                 var transaction = new Transaction(account.AccountCode, 3000 + x, "USD");
-                transaction.Create();
-                transaction.Refund(1500);
+                transaction.CreateAsync();
+                transaction.RefundAsync(1500);
             }
 
             var list = Transactions.List(type: TransactionList.TransactionType.Refund);
@@ -75,10 +75,10 @@ namespace Recurly.Test
             var account = await CreateNewAccountWithBillingInfoAsync();
 
             var transaction1 = new Transaction(account.AccountCode, 3000, "USD");
-            transaction1.Create();
+            transaction1.CreateAsync();
 
             var transaction2 = new Transaction(account.AccountCode, 200, "USD");
-            transaction2.Create();
+            transaction2.CreateAsync();
 
             var list = account.GetTransactions();
             list.Should().NotBeEmpty();

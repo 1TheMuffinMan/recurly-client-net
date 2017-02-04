@@ -12,7 +12,7 @@ namespace Recurly.Test
         {
             var acct = await CreateNewAccountWithBillingInfoAsync();
             var transaction = new Transaction(acct, 5000, "USD");
-            transaction.Create();
+            transaction.CreateAsync();
 
             var fromService = Transactions.Get(transaction.Uuid);
 
@@ -20,18 +20,18 @@ namespace Recurly.Test
         }
 
         [RecurlyFact(TestEnvironment.Type.Integration)]
-        public void CreateTransactionNewAccount()
+        public async Task CreateTransactionNewAccount()
         {
             var account = NewAccountWithBillingInfo();
             var transaction = new Transaction(account, 5000, "USD");
             transaction.Description = "Description";
 
-            transaction.Create();
+            transaction.CreateAsync();
 
             transaction.CreatedAt.Should().NotBe(default(DateTime));
             
-            var fromService = Transactions.Get(transaction.Uuid);
-            var invoice = fromService.GetInvoice();
+            var fromService = await Transactions.Get(transaction.Uuid);
+            var invoice = await fromService.GetInvoice();
             var line_items = invoice.Adjustments;
             
             line_items[0].Description.Should().Be(transaction.Description);
@@ -44,7 +44,7 @@ namespace Recurly.Test
             var acct = await CreateNewAccountWithBillingInfoAsync();
             var transaction = new Transaction(acct.AccountCode, 3000, "USD");
 
-            transaction.Create();
+            transaction.CreateAsync();
 
             transaction.CreatedAt.Should().NotBe(default(DateTime));
         }
@@ -61,7 +61,7 @@ namespace Recurly.Test
             account.BillingInfo = NewBillingInfo(account);
             var transaction = new Transaction(account, 5000, "USD");
 
-            transaction.Create();
+            transaction.CreateAsync();
 
             transaction.CreatedAt.Should().NotBe(default(DateTime));
         }
@@ -71,9 +71,9 @@ namespace Recurly.Test
         {
             var acct = NewAccountWithBillingInfo();
             var transaction = new Transaction(acct, 5000, "USD");
-            transaction.Create();
+            transaction.CreateAsync();
 
-            transaction.Refund();
+            transaction.RefundAsync();
 
             transaction.Status.Should().Be(Transaction.TransactionState.Voided);
         }
@@ -83,9 +83,9 @@ namespace Recurly.Test
         {
             var account = NewAccountWithBillingInfo();
             var transaction = new Transaction(account, 5000, "USD");
-            transaction.Create();
+            transaction.CreateAsync();
 
-            transaction.Refund(2500);
+            transaction.RefundAsync(2500);
 
             account.GetTransactions().Should().HaveCount(2);
         }

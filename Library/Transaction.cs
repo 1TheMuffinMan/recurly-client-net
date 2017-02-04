@@ -2,6 +2,7 @@
 using System.Net;
 using System.Xml;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Recurly
 {
@@ -119,9 +120,9 @@ namespace Recurly
         /// <summary>
         /// Creates an invoice, charge, and optionally account
         /// </summary>
-        public void Create()
+        public async Task CreateAsync()
         {
-             Client.Instance.PerformRequest(Client.HttpRequestMethod.Post,
+             await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Post,
                 UrlPrefix,
                 WriteXml,
                 ReadXml);
@@ -132,16 +133,16 @@ namespace Recurly
         ///
         /// </summary>
         /// <param name="refund">If present, the amount to refund. Otherwise it is a full refund.</param>
-        public void Refund(int? refund = null)
+        public async Task RefundAsync(int? refund = null)
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Delete,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Delete,
                 UrlPrefix + Uri.EscapeUriString(Uuid) + (refund.HasValue ? "?amount_in_cents=" + refund.Value : ""),
                 ReadXml);
         }
 
-        public Invoice GetInvoice()
+        public async Task<Invoice> GetInvoice()
         {
-            return Invoices.Get(InvoiceNumberWithPrefix());
+            return await Invoices.GetAsync(InvoiceNumberWithPrefix());
         }
 
 
@@ -340,11 +341,11 @@ namespace Recurly
             );
         }
 
-        public static Transaction Get(string transactionId)
+        public static async Task<Transaction> Get(string transactionId)
         {
             var transaction = new Transaction();
 
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Get,
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Get,
                 Transaction.UrlPrefix + Uri.EscapeUriString(transactionId),
                 transaction.ReadXml);
 
