@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace Recurly
@@ -144,11 +145,11 @@ namespace Recurly
         /// </summary>
         /// <param name="accountCode"></param>
         /// <returns></returns>
-        public static BillingInfo Get(string accountCode)
+        public static async Task<BillingInfo> GetAsync(string accountCode)
         {
             var billingInfo = new BillingInfo();
 
-            var statusCode = Client.Instance.PerformRequest(Client.HttpRequestMethod.Get,
+            var statusCode = await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Get,
                 BillingInfoUrl(accountCode),
                 billingInfo.ReadXml);
 
@@ -158,17 +159,17 @@ namespace Recurly
         /// <summary>
         /// Update an account's billing info in Recurly
         /// </summary>
-        public void Create()
+        public async Task CreateAsync()
         {
-            Update();
+            await UpdateAsync();
         }
 
         /// <summary>
         /// Update an account's billing info in Recurly
         /// </summary>
-        public void Update()
+        public async Task UpdateAsync()
         {
-            Client.Instance.PerformRequest(Client.HttpRequestMethod.Put,
+            await Client.Instance.PerformRequestAsync(Client.HttpRequestMethod.Put,
                 BillingInfoUrl(AccountCode),
                 WriteXml,
                 ReadXml);

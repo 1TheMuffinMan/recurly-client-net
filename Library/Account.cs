@@ -56,7 +56,7 @@ namespace Recurly
 
                 try
                 {
-                    _billingInfo = BillingInfo.Get(AccountCode);
+                    _billingInfo = BillingInfo.GetAsync(AccountCode).GetAwaiter().GetResult();
                 }
                 catch (NotFoundException)
                 {
